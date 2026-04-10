@@ -169,6 +169,36 @@ class RoomPlayerRepositoryTest {
         repository.updateHorseBinding(horseId, targetId)
         assertNull(repository.observePlayers().first().first { it.id == horseId }.boundOnTablePlayerId)
     }
+
+    @Test
+    fun swapOnTableWithHorse_exchangesRolesAndClearsBindings() = runTest {
+        val repository = RoomPlayerRepository(FakePlayerDao())
+        repository.addPlayer("OnTable", 100)
+        repository.addPlayer("HorseA", 100)
+        repository.addPlayer("HorseB", 100)
+        val playersByName = repository.observePlayers().first().associateBy { it.name }
+        val onTableId = playersByName.getValue("OnTable").id
+        val horseAId = playersByName.getValue("HorseA").id
+        val horseBId = playersByName.getValue("HorseB").id
+
+        repository.updatePlayerRole(horseAId, PlayerRole.HORSE)
+        repository.updatePlayerRole(horseBId, PlayerRole.HORSE)
+        repository.updateHorseBinding(horseBId, onTableId)
+        assertEquals(
+            onTableId,
+            repository.observePlayers().first().first { it.id == horseBId }.boundOnTablePlayerId
+        )
+
+        repository.swapOnTableWithHorse(
+            onTablePlayerId = onTableId,
+            horsePlayerId = horseAId
+        )
+
+        val playersById = repository.observePlayers().first().associateBy { it.id }
+        assertEquals(PlayerRole.HORSE, playersById.getValue(onTableId).playerRole)
+        assertEquals(PlayerRole.ON_TABLE, playersById.getValue(horseAId).playerRole)
+        assertNull(playersById.getValue(horseBId).boundOnTablePlayerId)
+    }
 }
 
 private class FakePlayerDao : PlayerDao {

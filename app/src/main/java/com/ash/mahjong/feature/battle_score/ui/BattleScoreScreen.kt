@@ -29,7 +29,9 @@ import com.ash.mahjong.feature.battle_score.ui.components.DrawSettlementDialogHo
 import com.ash.mahjong.feature.battle_score.ui.components.HorseBindingDialog
 import com.ash.mahjong.feature.battle_score.ui.components.HorseSection
 import com.ash.mahjong.feature.battle_score.ui.components.LiveLogSection
+import com.ash.mahjong.feature.battle_score.ui.components.PlayerSwapDialog
 import com.ash.mahjong.feature.battle_score.ui.components.PlayersGrid
+import com.ash.mahjong.feature.battle_score.ui.components.ResetAllConfirmDialog
 import com.ash.mahjong.feature.battle_score.ui.components.SettlementPromptDialog
 import com.ash.mahjong.ui.theme.MahjongDesign
 
@@ -56,10 +58,12 @@ fun BattleScoreScreen(
             BattleTopBar(
                 currentRound = uiState.currentRound,
                 canSettle = uiState.canSettle,
+                canSwapPlayers = !uiState.requiresPlayerSetup && uiState.horses.isNotEmpty(),
+                canReset = !uiState.requiresPlayerSetup,
                 onSettleClick = { dispatchIntent(BattleScoreIntent.OnFabClick) },
-                onQuickPlayersClick = onGoToPlayers,
+                onSwapPlayersClick = { dispatchIntent(BattleScoreIntent.OpenPlayerSwapDialog) },
+                onResetClick = { dispatchIntent(BattleScoreIntent.OpenResetAllConfirmDialog) },
                 onQuickHistoryClick = {},
-                onQuickSettingsClick = {},
                 modifier = Modifier.testTag(BattleScoreTestTags.TOP_BAR)
             )
         }
@@ -151,6 +155,22 @@ fun BattleScoreScreen(
         )
     }
 
+    if (uiState.playerSwapDialogVisible) {
+        PlayerSwapDialog(
+            onTablePlayers = uiState.players,
+            horses = uiState.horses,
+            onSwap = { onTablePlayerId, horseId ->
+                dispatchIntent(
+                    BattleScoreIntent.SwapOnTableWithHorse(
+                        onTablePlayerId = onTablePlayerId,
+                        horsePlayerId = horseId
+                    )
+                )
+            },
+            onDismiss = { dispatchIntent(BattleScoreIntent.DismissPlayerSwapDialog) }
+        )
+    }
+
     uiState.drawSettlementDraft?.let { draft ->
         DrawSettlementDialogHost(
             draft = draft,
@@ -166,6 +186,14 @@ fun BattleScoreScreen(
             players = uiState.players,
             horses = uiState.horses,
             onIntent = ::dispatchIntent
+        )
+    }
+
+    uiState.resetAllConfirmStep?.let { step ->
+        ResetAllConfirmDialog(
+            step = step,
+            onDismiss = { dispatchIntent(BattleScoreIntent.DismissResetAllConfirmDialog) },
+            onConfirm = { dispatchIntent(BattleScoreIntent.ConfirmResetAllConfirmDialog) }
         )
     }
 }

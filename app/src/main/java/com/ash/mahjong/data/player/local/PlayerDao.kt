@@ -4,6 +4,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
+import com.ash.mahjong.data.player.PlayerRole
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -42,4 +44,24 @@ interface PlayerDao {
 
     @Query("UPDATE players SET avatar_key = :avatarKey WHERE id = :playerId")
     suspend fun updatePlayerAvatar(playerId: Int, avatarKey: String)
+
+    @Transaction
+    suspend fun swapOnTableWithHorse(
+        onTablePlayerId: Int,
+        horsePlayerId: Int
+    ) {
+        val onTablePlayer = getPlayerById(onTablePlayerId) ?: return
+        val horsePlayer = getPlayerById(horsePlayerId) ?: return
+        if (!onTablePlayer.isActive || !horsePlayer.isActive) {
+            return
+        }
+        if (onTablePlayer.playerRole != PlayerRole.ON_TABLE.name ||
+            horsePlayer.playerRole != PlayerRole.HORSE.name
+        ) {
+            return
+        }
+        updatePlayerRole(playerId = onTablePlayerId, playerRole = PlayerRole.HORSE.name)
+        updatePlayerRole(playerId = horsePlayerId, playerRole = PlayerRole.ON_TABLE.name)
+        clearHorseBindingsByTarget(targetPlayerId = onTablePlayerId)
+    }
 }

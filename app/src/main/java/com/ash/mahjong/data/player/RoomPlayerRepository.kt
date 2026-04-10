@@ -87,6 +87,13 @@ class RoomPlayerRepository @Inject constructor(
         )
     }
 
+    override suspend fun swapOnTableWithHorse(onTablePlayerId: Int, horsePlayerId: Int) {
+        playerDao.swapOnTableWithHorse(
+            onTablePlayerId = onTablePlayerId,
+            horsePlayerId = horsePlayerId
+        )
+    }
+
     override suspend fun updatePlayerAvatar(playerId: Int, avatarKey: String) {
         val normalizedAvatarKey = PlayerAnimalAvatarCatalog.normalizeAvatarKey(avatarKey) ?: return
         val targetPlayer = playerDao.getPlayerById(playerId) ?: return

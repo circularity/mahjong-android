@@ -10,6 +10,7 @@ import com.ash.mahjong.feature.battle_score.state.DrawSettlementStep
 import com.ash.mahjong.feature.battle_score.state.EventDraftStep
 import com.ash.mahjong.feature.battle_score.state.LiveLogActionType
 import com.ash.mahjong.feature.battle_score.state.PlayerStatus
+import com.ash.mahjong.feature.battle_score.state.ResetAllConfirmStep
 import com.ash.mahjong.feature.battle_score.state.SettlementPromptType
 import com.ash.mahjong.test.fake.FakeGameSettingsRepository
 import com.ash.mahjong.test.fake.FakePlayerRepository
@@ -182,6 +183,56 @@ class BattleScoreViewModelTest {
         assertEquals(6, draft?.horseId)
         val horse = viewModel.uiState.value.horses.first { it.id == 6 }
         assertNull(horse.boundOnTablePlayerName)
+    }
+
+    @Test
+    fun openPlayerSwapDialog_requiresHorseAndCanDismiss() = runTest {
+        val viewModelWithHorse = BattleScoreViewModel(
+            playerRepository = FakePlayerRepository(initialPlayers = playersWithBindingForNextRound()),
+            gameSettingsRepository = FakeGameSettingsRepository()
+        )
+        advanceUntilIdle()
+        viewModelWithHorse.onIntent(BattleScoreIntent.OpenPlayerSwapDialog)
+        advanceUntilIdle()
+        assertTrue(viewModelWithHorse.uiState.value.playerSwapDialogVisible)
+
+        viewModelWithHorse.onIntent(BattleScoreIntent.DismissPlayerSwapDialog)
+        advanceUntilIdle()
+        assertFalse(viewModelWithHorse.uiState.value.playerSwapDialogVisible)
+
+        val viewModelWithoutHorse = BattleScoreViewModel(
+            playerRepository = FakePlayerRepository(initialPlayers = fourPlayers()),
+            gameSettingsRepository = FakeGameSettingsRepository()
+        )
+        advanceUntilIdle()
+        viewModelWithoutHorse.onIntent(BattleScoreIntent.OpenPlayerSwapDialog)
+        advanceUntilIdle()
+        assertFalse(viewModelWithoutHorse.uiState.value.playerSwapDialogVisible)
+    }
+
+    @Test
+    fun swapOnTableWithHorse_exchangesRolesAndKeepsFourOnTablePlayers() = runTest {
+        val viewModel = BattleScoreViewModel(
+            playerRepository = FakePlayerRepository(initialPlayers = playersWithBindingForNextRound()),
+            gameSettingsRepository = FakeGameSettingsRepository()
+        )
+        advanceUntilIdle()
+
+        viewModel.onIntent(BattleScoreIntent.OpenPlayerSwapDialog)
+        viewModel.onIntent(
+            BattleScoreIntent.SwapOnTableWithHorse(
+                onTablePlayerId = 1,
+                horsePlayerId = 6
+            )
+        )
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertFalse(state.playerSwapDialogVisible)
+        assertEquals(4, state.players.size)
+        assertEquals(listOf(2, 3, 4, 6), state.players.map { it.id })
+        assertEquals(listOf(1), state.horses.map { it.id })
+        assertNull(state.horses.first().boundOnTablePlayerName)
     }
 
     @Test
@@ -797,6 +848,57 @@ class BattleScoreViewModelTest {
         assertNull(players.getValue(2).winOrder)
         assertEquals(false, state.canUndo)
         assertTrue(state.liveLogs.isEmpty())
+    }
+
+    @Test
+    fun resetAll_requiresTwoConfirmSteps() = runTest {
+        val viewModel = BattleScoreViewModel(
+            playerRepository = FakePlayerRepository(initialPlayers = fourPlayers()),
+            gameSettingsRepository = FakeGameSettingsRepository()
+        )
+        advanceUntilIdle()
+
+        viewModel.onIntent(BattleScoreIntent.OpenResetAllConfirmDialog)
+        assertEquals(ResetAllConfirmStep.FIRST, viewModel.uiState.value.resetAllConfirmStep)
+
+        viewModel.onIntent(BattleScoreIntent.ConfirmResetAllConfirmDialog)
+        assertEquals(ResetAllConfirmStep.SECOND, viewModel.uiState.value.resetAllConfirmStep)
+
+        viewModel.onIntent(BattleScoreIntent.DismissResetAllConfirmDialog)
+        assertNull(viewModel.uiState.value.resetAllConfirmStep)
+    }
+
+    @Test
+    fun resetAll_afterSecondConfirm_resetsRoundAndScores() = runTest {
+        val viewModel = BattleScoreViewModel(
+            playerRepository = FakePlayerRepository(initialPlayers = fourPlayers()),
+            gameSettingsRepository = FakeGameSettingsRepository()
+        )
+        advanceUntilIdle()
+
+        hu(viewModel, actorId = 1, targetId = 2)
+        hu(viewModel, actorId = 3, targetId = 4)
+        hu(viewModel, actorId = 2, targetId = 4)
+        advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.players.any { it.totalScore != "100" })
+        assertNotNull(viewModel.uiState.value.settlementPrompt)
+        assertEquals(1, viewModel.uiState.value.currentRound)
+
+        viewModel.onIntent(BattleScoreIntent.OpenResetAllConfirmDialog)
+        viewModel.onIntent(BattleScoreIntent.ConfirmResetAllConfirmDialog)
+        viewModel.onIntent(BattleScoreIntent.ConfirmResetAllConfirmDialog)
+        advanceUntilIdle()
+
+        val resetState = viewModel.uiState.value
+        assertEquals(1, resetState.currentRound)
+        assertTrue(resetState.players.all { it.totalScore == "100" })
+        assertTrue(resetState.players.all { it.roundDelta == "+0" })
+        assertTrue(resetState.players.all { it.status == PlayerStatus.ACTIVE })
+        assertTrue(resetState.liveLogs.isEmpty())
+        assertFalse(resetState.canUndo)
+        assertNull(resetState.settlementPrompt)
+        assertNull(resetState.resetAllConfirmStep)
     }
 
     @Test

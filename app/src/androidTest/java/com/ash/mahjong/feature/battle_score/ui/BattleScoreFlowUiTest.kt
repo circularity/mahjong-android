@@ -457,10 +457,12 @@ class BattleScoreFlowUiTest {
             requiresPlayerSetup = requiresPlayerSetup,
             canUndo = false,
             canSettle = canSettle,
+            playerSwapDialogVisible = false,
             multiplierRange = 1..8,
             eventDraft = eventDraft,
             drawSettlementDraft = drawSettlementDraft,
-            settlementPrompt = settlementPrompt
+            settlementPrompt = settlementPrompt,
+            resetAllConfirmStep = null
         )
     }
 }

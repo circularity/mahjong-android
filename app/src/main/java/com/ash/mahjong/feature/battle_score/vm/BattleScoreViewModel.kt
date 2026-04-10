@@ -29,6 +29,7 @@ import com.ash.mahjong.feature.battle_score.state.LiveLogHighlight
 import com.ash.mahjong.feature.battle_score.state.LiveLogItemUiModel
 import com.ash.mahjong.feature.battle_score.state.PlayerCardUiModel
 import com.ash.mahjong.feature.battle_score.state.PlayerStatus
+import com.ash.mahjong.feature.battle_score.state.ResetAllConfirmStep
 import com.ash.mahjong.feature.battle_score.state.SettlementPromptType
 import com.ash.mahjong.feature.battle_score.state.SettlementPromptUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -116,6 +117,9 @@ class BattleScoreViewModel @Inject constructor(
                         horseBindingDraft = state.horseBindingDraft?.takeIf { draft ->
                             horseUiModels.any { horse -> horse.id == draft.horseId }
                         },
+                        playerSwapDialogVisible = state.playerSwapDialogVisible &&
+                            homePlayers.size == BATTLE_PLAYER_LIMIT &&
+                            horseUiModels.isNotEmpty(),
                         requiresPlayerSetup = requiresSetup,
                         canSettle = !requiresSetup,
                         eventDraft = if (requiresSetup) null else state.eventDraft,
@@ -166,6 +170,9 @@ class BattleScoreViewModel @Inject constructor(
             BattleScoreIntent.CancelEventDraft -> dismissEventDraft()
             BattleScoreIntent.UndoLastEvent -> undoLastEvent()
             BattleScoreIntent.OnFabClick -> onManualSettleClick()
+            BattleScoreIntent.OpenResetAllConfirmDialog -> openResetAllConfirmDialog()
+            BattleScoreIntent.ConfirmResetAllConfirmDialog -> confirmResetAllConfirmDialog()
+            BattleScoreIntent.DismissResetAllConfirmDialog -> dismissResetAllConfirmDialog()
             is BattleScoreIntent.SelectDrawTingChoice -> onSelectDrawTingChoice(intent.isTing)
             is BattleScoreIntent.SelectDrawTingMultiplier -> onSelectDrawTingMultiplier(intent.multiplier)
             BattleScoreIntent.ConfirmDrawSettlementSelection -> confirmDrawSettlementSelection()
@@ -178,6 +185,14 @@ class BattleScoreViewModel @Inject constructor(
                 selectHorseBindingTarget(intent.targetPlayerId)
             }
             BattleScoreIntent.CancelHorseBinding -> cancelHorseBinding()
+            BattleScoreIntent.OpenPlayerSwapDialog -> openPlayerSwapDialog()
+            BattleScoreIntent.DismissPlayerSwapDialog -> dismissPlayerSwapDialog()
+            is BattleScoreIntent.SwapOnTableWithHorse -> {
+                swapOnTableWithHorse(
+                    onTablePlayerId = intent.onTablePlayerId,
+                    horsePlayerId = intent.horsePlayerId
+                )
+            }
         }
 
         _uiState.update { state ->
@@ -259,6 +274,49 @@ class BattleScoreViewModel @Inject constructor(
 
     private fun cancelHorseBinding() {
         _uiState.update { state -> state.copy(horseBindingDraft = null) }
+    }
+
+    private fun openPlayerSwapDialog() {
+        val state = uiState.value
+        if (state.requiresPlayerSetup || state.players.size < BATTLE_PLAYER_LIMIT || state.horses.isEmpty()) {
+            return
+        }
+        _uiState.update { current -> current.copy(playerSwapDialogVisible = true) }
+    }
+
+    private fun dismissPlayerSwapDialog() {
+        _uiState.update { state -> state.copy(playerSwapDialogVisible = false) }
+    }
+
+    private fun swapOnTableWithHorse(
+        onTablePlayerId: Int,
+        horsePlayerId: Int
+    ) {
+        val onTablePlayer = latestAllPlayers.firstOrNull { player ->
+            player.id == onTablePlayerId &&
+                player.isActive &&
+                player.playerRole == PlayerRole.ON_TABLE
+        } ?: return
+        val horsePlayer = latestAllPlayers.firstOrNull { player ->
+            player.id == horsePlayerId &&
+                player.isActive &&
+                player.playerRole == PlayerRole.HORSE
+        } ?: return
+
+        viewModelScope.launch {
+            playerRepository.swapOnTableWithHorse(
+                onTablePlayerId = onTablePlayer.id,
+                horsePlayerId = horsePlayer.id
+            )
+            _uiState.update { state ->
+                state.copy(
+                    playerSwapDialogVisible = false,
+                    horseBindingDraft = null,
+                    eventDraft = null,
+                    drawSettlementDraft = null
+                )
+            }
+        }
     }
 
     private fun onSelectTarget(targetId: Int) {
@@ -510,6 +568,79 @@ class BattleScoreViewModel @Inject constructor(
             return
         }
         startDrawSettlementDraft()
+    }
+
+    private fun openResetAllConfirmDialog() {
+        if (uiState.value.requiresPlayerSetup) {
+            return
+        }
+        _uiState.update { state ->
+            state.copy(
+                eventDraft = null,
+                drawSettlementDraft = null,
+                settlementPrompt = null,
+                horseBindingDraft = null,
+                playerSwapDialogVisible = false,
+                resetAllConfirmStep = ResetAllConfirmStep.FIRST
+            )
+        }
+    }
+
+    private fun dismissResetAllConfirmDialog() {
+        _uiState.update { state -> state.copy(resetAllConfirmStep = null) }
+    }
+
+    private fun confirmResetAllConfirmDialog() {
+        when (uiState.value.resetAllConfirmStep) {
+            ResetAllConfirmStep.FIRST -> {
+                _uiState.update { state -> state.copy(resetAllConfirmStep = ResetAllConfirmStep.SECOND) }
+            }
+
+            ResetAllConfirmStep.SECOND -> {
+                resetAllRoundsAndScores()
+            }
+
+            null -> Unit
+        }
+    }
+
+    private fun resetAllRoundsAndScores() {
+        totalScoreByPlayerId.clear()
+        roundDeltaByPlayerId.clear()
+        statusByPlayerId.clear()
+        winOrderByPlayerId.clear()
+
+        latestAllPlayers
+            .filter { player -> player.isActive }
+            .forEach { player ->
+                totalScoreByPlayerId[player.id] = player.score
+                roundDeltaByPlayerId[player.id] = 0
+            }
+
+        latestPlayers.forEach { player ->
+            statusByPlayerId[player.id] = PlayerStatus.ACTIVE
+        }
+
+        nextWinOrder = 1
+        nextLiveLogId = 0
+        undoStack.clear()
+        roundScoringHistory.clear()
+
+        _uiState.update { state ->
+            state.copy(
+                currentRound = 1,
+                players = buildPlayerUiModels(latestPlayers),
+                horses = buildCurrentHorseUiModels(),
+                liveLogs = emptyList(),
+                canUndo = false,
+                eventDraft = null,
+                drawSettlementDraft = null,
+                settlementPrompt = null,
+                horseBindingDraft = null,
+                playerSwapDialogVisible = false,
+                resetAllConfirmStep = null
+            )
+        }
     }
 
     private fun startDrawSettlementDraft() {
@@ -893,10 +1024,12 @@ class BattleScoreViewModel @Inject constructor(
             requiresPlayerSetup = true,
             canUndo = false,
             canSettle = false,
+            playerSwapDialogVisible = false,
             multiplierRange = 1..GameSettings.DEFAULT_CAPPING_MULTIPLIER,
             eventDraft = null,
             drawSettlementDraft = null,
-            settlementPrompt = null
+            settlementPrompt = null,
+            resetAllConfirmStep = null
         )
     }
 

@@ -16,10 +16,12 @@ data class BattleScoreUiState(
     val requiresPlayerSetup: Boolean,
     val canUndo: Boolean,
     val canSettle: Boolean,
+    val playerSwapDialogVisible: Boolean,
     val multiplierRange: IntRange,
     val eventDraft: EventDraftUiState?,
     val drawSettlementDraft: DrawSettlementDraftUiState?,
-    val settlementPrompt: SettlementPromptUiState?
+    val settlementPrompt: SettlementPromptUiState?,
+    val resetAllConfirmStep: ResetAllConfirmStep?
 )
 
 data class EventDraftUiState(
@@ -50,6 +52,11 @@ data class SettlementPromptUiState(
 enum class DrawSettlementStep {
     CHOOSE_TING,
     CHOOSE_MULTIPLIER
+}
+
+enum class ResetAllConfirmStep {
+    FIRST,
+    SECOND
 }
 
 data class DrawSettlementChoiceUiState(

@@ -130,6 +130,45 @@ class FakePlayerRepository(
         }
     }
 
+    override suspend fun swapOnTableWithHorse(onTablePlayerId: Int, horsePlayerId: Int) {
+        val onTablePlayer = playersFlow.value.firstOrNull { it.id == onTablePlayerId } ?: return
+        val horsePlayer = playersFlow.value.firstOrNull { it.id == horsePlayerId } ?: return
+        if (!onTablePlayer.isActive || !horsePlayer.isActive) {
+            return
+        }
+        if (onTablePlayer.playerRole != PlayerRole.ON_TABLE ||
+            horsePlayer.playerRole != PlayerRole.HORSE
+        ) {
+            return
+        }
+
+        playersFlow.update { players ->
+            players.map { player ->
+                when {
+                    player.id == onTablePlayerId -> {
+                        player.copy(
+                            playerRole = PlayerRole.HORSE,
+                            boundOnTablePlayerId = null
+                        )
+                    }
+
+                    player.id == horsePlayerId -> {
+                        player.copy(
+                            playerRole = PlayerRole.ON_TABLE,
+                            boundOnTablePlayerId = null
+                        )
+                    }
+
+                    player.boundOnTablePlayerId == onTablePlayerId -> {
+                        player.copy(boundOnTablePlayerId = null)
+                    }
+
+                    else -> player
+                }
+            }
+        }
+    }
+
     override suspend fun updatePlayerAvatar(playerId: Int, avatarKey: String) {
         val normalizedAvatarKey = PlayerAnimalAvatarCatalog.normalizeAvatarKey(avatarKey) ?: return
         playersFlow.update { players ->

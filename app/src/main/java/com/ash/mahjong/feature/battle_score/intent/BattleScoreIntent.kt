@@ -20,6 +20,9 @@ sealed interface BattleScoreIntent {
     data object UndoLastEvent : BattleScoreIntent
 
     data object OnFabClick : BattleScoreIntent
+    data object OpenResetAllConfirmDialog : BattleScoreIntent
+    data object ConfirmResetAllConfirmDialog : BattleScoreIntent
+    data object DismissResetAllConfirmDialog : BattleScoreIntent
 
     data class SelectDrawTingChoice(val isTing: Boolean) : BattleScoreIntent
     data class SelectDrawTingMultiplier(val multiplier: Int) : BattleScoreIntent
@@ -33,6 +36,13 @@ sealed interface BattleScoreIntent {
     data class StartHorseBinding(val horseId: Int) : BattleScoreIntent
     data class SelectHorseBindingTarget(val targetPlayerId: Int) : BattleScoreIntent
     data object CancelHorseBinding : BattleScoreIntent
+
+    data object OpenPlayerSwapDialog : BattleScoreIntent
+    data object DismissPlayerSwapDialog : BattleScoreIntent
+    data class SwapOnTableWithHorse(
+        val onTablePlayerId: Int,
+        val horsePlayerId: Int
+    ) : BattleScoreIntent
 }
 
 enum class BattleAction {

@@ -27,6 +27,11 @@ interface PlayerRepository {
         boundOnTablePlayerId: Int?
     )
 
+    suspend fun swapOnTableWithHorse(
+        onTablePlayerId: Int,
+        horsePlayerId: Int
+    )
+
     suspend fun updatePlayerAvatar(
         playerId: Int,
         avatarKey: String

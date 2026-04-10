@@ -36,6 +36,23 @@
     <string name="battle_nav_stats">Stats</string>
     <string name="battle_nav_rules">Players</string>
     <string name="battle_nav_settings">Settings</string>
+    <string name="battle_swap_players_action">Swap</string>
+    <string name="battle_reset_action">Reset</string>
+    <string name="battle_reset_confirm_cancel">Cancel</string>
+    <string name="battle_reset_confirm_step1_title">Reset current match?</string>
+    <string name="battle_reset_confirm_step1_message">Round will return to 1 and current process records will be cleared. One more confirmation is required.</string>
+    <string name="battle_reset_confirm_step1_action">Continue</string>
+    <string name="battle_reset_confirm_step2_title">Final confirmation</string>
+    <string name="battle_reset_confirm_step2_message">All players\' scores will reset to their initial values. This cannot be undone.</string>
+    <string name="battle_reset_confirm_step2_action">Reset Now</string>
+    <string name="battle_swap_dialog_title">Swap On-table Players</string>
+    <string name="battle_swap_dialog_subtitle">Drag or tap players to exchange on-table spots and horses.</string>
+    <string name="battle_swap_drag_hint">Select one card then another from the opposite group to swap quickly.</string>
+    <string name="battle_swap_column_on_table">On-table Players</string>
+    <string name="battle_swap_column_horse">Horses</string>
+    <string name="battle_swap_column_count_template">%1$s (%2$d)</string>
+    <string name="battle_swap_column_horse_candidates">Horses / Bench</string>
+    <string name="battle_swap_confirm_action">Done</string>
 
     <string name="player_role_dealer">Dealer</string>
     <string name="player_status_hu">HU</string>

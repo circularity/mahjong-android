@@ -36,6 +36,23 @@
     <string name="battle_nav_stats">统计</string>
     <string name="battle_nav_rules">玩家</string>
     <string name="battle_nav_settings">设置</string>
+    <string name="battle_swap_players_action">换人</string>
+    <string name="battle_reset_action">重置</string>
+    <string name="battle_reset_confirm_cancel">取消</string>
+    <string name="battle_reset_confirm_step1_title">确认重置对局？</string>
+    <string name="battle_reset_confirm_step1_message">将把局数重置为第 1 局，并清空当前流程记录。下一步还需再次确认。</string>
+    <string name="battle_reset_confirm_step1_action">继续</string>
+    <string name="battle_reset_confirm_step2_title">最后确认</string>
+    <string name="battle_reset_confirm_step2_message">所有玩家积分将恢复到初始分，且不可撤销。</string>
+    <string name="battle_reset_confirm_step2_action">立即重置</string>
+    <string name="battle_swap_dialog_title">场上换人</string>
+    <string name="battle_swap_dialog_subtitle">拖动或点击玩家可交换场上位置与马儿。</string>
+    <string name="battle_swap_drag_hint">先选一个卡片，再点另一组卡片即可快速换人。</string>
+    <string name="battle_swap_column_on_table">场上玩家</string>
+    <string name="battle_swap_column_horse">马儿</string>
+    <string name="battle_swap_column_count_template">%1$s（%2$d）</string>
+    <string name="battle_swap_column_horse_candidates">马儿/候补</string>
+    <string name="battle_swap_confirm_action">确认更换</string>
 
     <string name="player_role_dealer">庄家</string>
     <string name="player_status_hu">已胡</string>
