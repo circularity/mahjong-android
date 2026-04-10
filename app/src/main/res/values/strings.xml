@@ -1,0 +1,208 @@
+<resources>
+    <string name="app_name">Mahjong Score</string>
+
+    <string name="battle_title">Blood Battle</string>
+    <string name="battle_round_label">Round %1$d</string>
+    <string name="battle_wind_east">East Wind</string>
+    <string name="battle_history_entry">History</string>
+
+    <string name="battle_live_log_title">Live Log</string>
+    <string name="battle_live_log_recent">Latest 5 records</string>
+    <string name="battle_horse_section_title">Off-table Horses</string>
+    <string name="battle_horse_binding_template">Bound: %1$s</string>
+    <string name="battle_horse_binding_unbound">Unbound</string>
+    <string name="battle_horse_bind_action">Bind</string>
+    <string name="battle_horse_item_idle_template">%1$s (Idle)</string>
+    <string name="battle_horse_item_bound_template">%1$s (%2$s)</string>
+    <string name="battle_horse_binding_dialog_title">Bind Horse: %1$s</string>
+    <string name="battle_horse_binding_dialog_subtitle">Select one on-table player</string>
+    <string name="battle_horse_binding_no_targets">No on-table players available</string>
+    <string name="battle_horse_round_delta_template">Round: %1$s</string>
+    <string name="battle_horse_overflow_count">+%1$d</string>
+    <string name="battle_player_bound_horse_item_template">%1$s (Horse)</string>
+    <string name="battle_player_bound_horses_empty">No horse bound</string>
+    <string name="battle_player_bound_horses_empty_chip">No Horse</string>
+    <string name="battle_player_total_score_template">Total: %1$s</string>
+    <string name="battle_action_undo">Undo</string>
+
+    <string name="battle_action_hu">Hu</string>
+    <string name="battle_action_gang">Gang</string>
+    <string name="battle_action_zimo">Self Draw</string>
+    <string name="battle_action_gang_refund">Gang Refund</string>
+    <string name="battle_action_draw_settlement">Draw Settlement</string>
+    <string name="battle_fab_settle">Settle</string>
+
+    <string name="battle_nav_match">Match</string>
+    <string name="battle_nav_stats">Stats</string>
+    <string name="battle_nav_rules">Players</string>
+    <string name="battle_nav_settings">Settings</string>
+
+    <string name="player_role_dealer">Dealer</string>
+    <string name="player_status_hu">HU</string>
+    <string name="player_status_zimo">SELF DRAWN</string>
+    <string name="player_status_locked">LOCKED</string>
+    <string name="player_avatar_content_desc">Player avatar placeholder</string>
+
+    <string name="battle_player_name_zhang">Zhang Xiaogang</string>
+    <string name="battle_player_name_li">Li Meilin</string>
+    <string name="battle_player_name_wang">Wang Dawei</string>
+    <string name="battle_player_name_zhao">Zhao Min</string>
+
+    <string name="battle_log_title_zimo">Self Draw</string>
+    <string name="battle_log_subtitle_zimo">Auto collect from players not yet won</string>
+    <string name="battle_log_title_hu">Hu</string>
+    <string name="battle_log_subtitle_hu">Discard win settlement</string>
+    <string name="battle_log_title_gang">Gang</string>
+    <string name="battle_log_subtitle_gang_dian">Dian Gang</string>
+    <string name="battle_log_subtitle_gang_ba">Ba Gang</string>
+    <string name="battle_log_subtitle_gang_an">An Gang</string>
+    <string name="battle_log_title_template">%1$s %2$s</string>
+    <string name="battle_log_name_separator">, </string>
+    <string name="battle_log_related_none">No related players</string>
+    <string name="battle_log_related_hu_template">Discarder: %1$s</string>
+    <string name="battle_log_related_zimo_template">Paying players: %1$s</string>
+    <string name="battle_log_related_gang_dian_template">Dian Gang payer: %1$s</string>
+    <string name="battle_log_related_gang_ba_template">Paying players: %1$s</string>
+    <string name="battle_log_related_gang_an_template">Paying players: %1$s</string>
+    <string name="battle_log_related_gang_refund_template">Refund to: %1$s</string>
+    <string name="battle_log_related_draw_settlement_template">Ting players: %1$s</string>
+
+    <string name="battle_setup_title">Need 4 players to start</string>
+    <string name="battle_setup_subtitle">Add or select 4 players before recording events.</string>
+    <string name="battle_setup_action">Go To Players</string>
+
+    <string name="battle_draft_title_hu">Record Hu</string>
+    <string name="battle_draft_title_gang">Record Gang</string>
+    <string name="battle_draft_title_zimo">Record Self Draw</string>
+    <string name="battle_draft_actor_label">Current player: %1$s</string>
+    <string name="battle_draft_unknown_player">Unknown</string>
+    <string name="battle_draft_target_hu">Select discarder</string>
+    <string name="battle_draft_target_gang_dian">Select Dian Gang payer</string>
+    <string name="battle_draft_target_zimo_auto">Auto collect from %1$d active players</string>
+    <string name="battle_draft_gang_type">Select gang type</string>
+    <string name="battle_gang_type_dian">Dian Gang</string>
+    <string name="battle_gang_type_ba">Ba Gang</string>
+    <string name="battle_gang_type_an">An Gang</string>
+    <string name="battle_draft_selected_gang_type">Selected: %1$s</string>
+    <string name="battle_draft_none">None</string>
+    <string name="battle_draft_no_targets">No available players</string>
+    <string name="battle_draft_selected_target">Selected: %1$s</string>
+    <string name="battle_draft_multiplier">Multiplier</string>
+    <string name="battle_draft_multiplier_value">%1$dx</string>
+    <string name="battle_draft_multiplier_hint">Range: %1$d - %2$d</string>
+    <string name="battle_draft_confirm">Confirm</string>
+    <string name="battle_draft_cancel">Cancel</string>
+    <string name="battle_draft_back">Back</string>
+    <string name="battle_draft_gang_dialog_title">Select Gang Type</string>
+    <string name="battle_draft_gang_dialog_subtitle">Confirm gang scoring rule</string>
+    <string name="battle_gang_type_dian_desc">Discarder -2, actor +2</string>
+    <string name="battle_gang_type_ba_desc">Each opponent -1, actor +N</string>
+    <string name="battle_gang_type_an_desc">Each opponent -2, actor +2N</string>
+    <string name="battle_draft_confirm_selection">Confirm Selection</string>
+    <string name="battle_draft_target_dialog_subtitle">Tap a player card to continue</string>
+    <string name="battle_draft_target_dialog_subtitle_with_actor">Current player: %1$s</string>
+    <string name="battle_draft_target_score">Current score: %1$s</string>
+    <string name="battle_draft_multiplier_dialog_title">Select Fan (%1$d-%2$d fan)</string>
+    <string name="battle_draft_multiplier_dialog_subtitle">Confirm fan for this event</string>
+    <string name="battle_draft_multiplier_unit">Fan</string>
+    <string name="battle_draft_confirm_score">Confirm Score</string>
+
+    <string name="battle_settlement_title">Round Settlement</string>
+    <string name="battle_settlement_auto_message">Three players have won. Settle this round and start next round?</string>
+    <string name="battle_settlement_confirm">Settle</string>
+    <string name="battle_settlement_cancel">Back</string>
+    <string name="battle_settlement_close">Close</string>
+    <string name="battle_settlement_horse_tag">Horse</string>
+    <string name="battle_settlement_total_score">Total: %1$s</string>
+    <string name="battle_settlement_victory">Victory</string>
+    <string name="battle_settlement_next_round">Start Next Round</string>
+    <string name="battle_settlement_view_history">View History</string>
+
+    <string name="battle_draw_placeholder_title">Draw Settlement</string>
+    <string name="battle_draw_placeholder_message">Draw settlement flow is not implemented yet.</string>
+    <string name="battle_draw_placeholder_action">Got it</string>
+    <string name="battle_draw_progress">Pending player %1$d/%2$d</string>
+    <string name="battle_draw_choose_ting_title">%1$s: choose ting status</string>
+    <string name="battle_draw_choose_ting_subtitle">%1$s</string>
+    <string name="battle_draw_current_score">Current total: %1$s</string>
+    <string name="battle_draw_choice_ting">Ting</string>
+    <string name="battle_draw_choice_ting_desc">Select ting score. Non-ting players will pay you.</string>
+    <string name="battle_draw_choice_no_ting">No Ting</string>
+    <string name="battle_draw_choice_no_ting_desc">No ting payout for this round.</string>
+    <string name="battle_draw_choose_score_title">%1$s: Select Fan</string>
+    <string name="battle_draw_choose_score_subtitle">%1$s</string>
+    <string name="battle_draw_score_formula_hint">Ting score = base point × fan (%1$d-%2$d)</string>
+
+    <string name="players_page_title">Players</string>
+    <string name="players_add_title">Add New Player</string>
+    <string name="players_add_subtitle">Invite friends to join the game</string>
+    <string name="players_active_count">Active Players (%1$d)</string>
+    <string name="players_active_section">Active Players</string>
+    <string name="players_inactive_section">Inactive Players (%1$d)</string>
+    <string name="players_status_active">Active</string>
+    <string name="players_status_inactive">Inactive</string>
+    <string name="players_role_on_table">On Table</string>
+    <string name="players_role_horse">Horse</string>
+    <string name="players_points_unit">PTS</string>
+    <string name="players_win_rate">Win %1$d%%</string>
+    <string name="players_total_games">Games %1$d</string>
+    <string name="players_total_registered">Total Registered</string>
+    <string name="players_month_best">Monthly Best</string>
+    <string name="players_mvp_tag">MVP</string>
+    <string name="players_empty_state">No players yet. Tap above to add one.</string>
+    <string name="players_stats_none">-</string>
+    <string name="players_dialog_title">Add Player</string>
+    <string name="players_dialog_name_label">PLAYER NAME</string>
+    <string name="players_dialog_name_placeholder">Enter player name</string>
+    <string name="players_dialog_score_label">INITIAL SCORE</string>
+    <string name="players_dialog_confirm">Confirm Add</string>
+    <string name="players_dialog_cancel">Cancel</string>
+    <string name="players_dialog_error_empty_name">Please enter player name.</string>
+    <string name="players_dialog_error_duplicate_name">Player name already exists.</string>
+    <string name="players_avatar_content_description">Tap to change avatar</string>
+
+    <string name="players_nav_history">History</string>
+    <string name="players_nav_players">Players</string>
+
+    <string name="players_name_li">Li Siyuan</string>
+    <string name="players_name_zhang">Zhang Ruolin</string>
+    <string name="players_name_wang">Wang Dawei</string>
+    <string name="players_name_chen">Chen Xiaomeng</string>
+
+    <string name="players_icon_back">&lt;</string>
+    <string name="players_icon_more">...</string>
+    <string name="players_icon_add_user">+</string>
+    <string name="players_icon_chevron">&gt;</string>
+    <string name="players_icon_filter">=</string>
+    <string name="players_icon_edit">/</string>
+    <string name="players_icon_match">M</string>
+    <string name="players_icon_history">H</string>
+    <string name="players_icon_players">P</string>
+    <string name="players_icon_stats">S</string>
+    <string name="players_icon_trend_up">+</string>
+    <string name="players_icon_trend_flat">~</string>
+    <string name="players_icon_trend_down">-</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_profile_placeholder">P</string>
+    <string name="settings_section_game_rules">GAME RULES</string>
+    <string name="settings_section_feedback">FEEDBACK</string>
+    <string name="settings_section_about">ABOUT &amp; SUPPORT</string>
+    <string name="settings_bottom_point_label">Bottom Point</string>
+    <string name="settings_capping_label">Capping Multiplier</string>
+    <string name="settings_haptic_label">Haptic Feedback</string>
+    <string name="settings_version_label">Version</string>
+    <string name="settings_version_value">v%1$s</string>
+    <string name="settings_clear_cache_label">Clear Cache</string>
+    <string name="settings_clear_cache_suffix">Delete</string>
+    <string name="settings_about_label">About Tactile Zen</string>
+    <string name="settings_about_suffix">Info</string>
+    <string name="settings_footer_image_desc">Mahjong tiles on felt</string>
+    <string name="settings_footer_title">Enjoy every game.</string>
+    <string name="settings_footer_subtitle">May good fortune stay with you.</string>
+    <string name="settings_stepper_decrease">-</string>
+    <string name="settings_stepper_increase">+</string>
+
+    <string name="placeholder_stats_description">Stats page is under construction.</string>
+    <string name="placeholder_settings_description">Settings page is under construction.</string>
+</resources>

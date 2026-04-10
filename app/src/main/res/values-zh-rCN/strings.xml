@@ -1,0 +1,208 @@
+<resources>
+    <string name="app_name">麻将计分</string>
+
+    <string name="battle_title">血战到底</string>
+    <string name="battle_round_label">第 %1$d 局</string>
+    <string name="battle_wind_east">东风圈</string>
+    <string name="battle_history_entry">历史</string>
+
+    <string name="battle_live_log_title">实时流水</string>
+    <string name="battle_live_log_recent">最近 5 条记录</string>
+    <string name="battle_horse_section_title">场外马儿</string>
+    <string name="battle_horse_binding_template">关联：%1$s</string>
+    <string name="battle_horse_binding_unbound">未关联</string>
+    <string name="battle_horse_bind_action">关联</string>
+    <string name="battle_horse_item_idle_template">%1$s（空闲）</string>
+    <string name="battle_horse_item_bound_template">%1$s（%2$s）</string>
+    <string name="battle_horse_binding_dialog_title">关联马儿：%1$s</string>
+    <string name="battle_horse_binding_dialog_subtitle">请选择一位场上玩家</string>
+    <string name="battle_horse_binding_no_targets">暂无可关联的场上玩家</string>
+    <string name="battle_horse_round_delta_template">本局：%1$s</string>
+    <string name="battle_horse_overflow_count">+%1$d</string>
+    <string name="battle_player_bound_horse_item_template">%1$s（马）</string>
+    <string name="battle_player_bound_horses_empty">暂无关联</string>
+    <string name="battle_player_bound_horses_empty_chip">无马</string>
+    <string name="battle_player_total_score_template">总计：%1$s</string>
+    <string name="battle_action_undo">撤销</string>
+
+    <string name="battle_action_hu">胡牌</string>
+    <string name="battle_action_gang">杠</string>
+    <string name="battle_action_zimo">自摸</string>
+    <string name="battle_action_gang_refund">退杠</string>
+    <string name="battle_action_draw_settlement">流局结算</string>
+    <string name="battle_fab_settle">结算</string>
+
+    <string name="battle_nav_match">对局</string>
+    <string name="battle_nav_stats">统计</string>
+    <string name="battle_nav_rules">玩家</string>
+    <string name="battle_nav_settings">设置</string>
+
+    <string name="player_role_dealer">庄家</string>
+    <string name="player_status_hu">已胡</string>
+    <string name="player_status_zimo">已自摸</string>
+    <string name="player_status_locked">锁定</string>
+    <string name="player_avatar_content_desc">玩家头像占位图</string>
+
+    <string name="battle_player_name_zhang">张小刚</string>
+    <string name="battle_player_name_li">李美琳</string>
+    <string name="battle_player_name_wang">王大为</string>
+    <string name="battle_player_name_zhao">赵敏</string>
+
+    <string name="battle_log_title_zimo">自摸</string>
+    <string name="battle_log_subtitle_zimo">自动向未胡玩家收分</string>
+    <string name="battle_log_title_hu">胡牌</string>
+    <string name="battle_log_subtitle_hu">点炮结算</string>
+    <string name="battle_log_title_gang">杠牌</string>
+    <string name="battle_log_subtitle_gang_dian">点杠</string>
+    <string name="battle_log_subtitle_gang_ba">巴杠</string>
+    <string name="battle_log_subtitle_gang_an">暗杠</string>
+    <string name="battle_log_title_template">%1$s %2$s</string>
+    <string name="battle_log_name_separator">、</string>
+    <string name="battle_log_related_none">无关联对象</string>
+    <string name="battle_log_related_hu_template">点炮者：%1$s</string>
+    <string name="battle_log_related_zimo_template">收分对象：%1$s</string>
+    <string name="battle_log_related_gang_dian_template">点杠者：%1$s</string>
+    <string name="battle_log_related_gang_ba_template">扣分对象：%1$s</string>
+    <string name="battle_log_related_gang_an_template">扣分对象：%1$s</string>
+    <string name="battle_log_related_gang_refund_template">退分对象：%1$s</string>
+    <string name="battle_log_related_draw_settlement_template">停牌玩家：%1$s</string>
+
+    <string name="battle_setup_title">需要 4 位玩家才能开局</string>
+    <string name="battle_setup_subtitle">请先在玩家页补齐或选择 4 位玩家，再开始记分。</string>
+    <string name="battle_setup_action">去玩家页</string>
+
+    <string name="battle_draft_title_hu">记录胡牌</string>
+    <string name="battle_draft_title_gang">记录杠牌</string>
+    <string name="battle_draft_title_zimo">记录自摸</string>
+    <string name="battle_draft_actor_label">当前玩家：%1$s</string>
+    <string name="battle_draft_unknown_player">未知玩家</string>
+    <string name="battle_draft_target_hu">选择放炮人</string>
+    <string name="battle_draft_target_gang_dian">选择点杠人</string>
+    <string name="battle_draft_target_zimo_auto">自动向 %1$d 位未胡玩家收分</string>
+    <string name="battle_draft_gang_type">选择杠类型</string>
+    <string name="battle_gang_type_dian">点杠</string>
+    <string name="battle_gang_type_ba">巴杠</string>
+    <string name="battle_gang_type_an">暗杠</string>
+    <string name="battle_draft_selected_gang_type">已选：%1$s</string>
+    <string name="battle_draft_none">未选择</string>
+    <string name="battle_draft_no_targets">没有可选玩家</string>
+    <string name="battle_draft_selected_target">已选：%1$s</string>
+    <string name="battle_draft_multiplier">倍数</string>
+    <string name="battle_draft_multiplier_value">%1$d 倍</string>
+    <string name="battle_draft_multiplier_hint">可选范围：%1$d ~ %2$d</string>
+    <string name="battle_draft_confirm">确认</string>
+    <string name="battle_draft_cancel">取消</string>
+    <string name="battle_draft_back">返回</string>
+    <string name="battle_draft_gang_dialog_title">选择杠牌类型</string>
+    <string name="battle_draft_gang_dialog_subtitle">确认杠牌得分规则</string>
+    <string name="battle_gang_type_dian_desc">放杠者 -2，杠牌者 +2</string>
+    <string name="battle_gang_type_ba_desc">每人 -1，杠牌者 +N</string>
+    <string name="battle_gang_type_an_desc">每人 -2，杠牌者 +2N</string>
+    <string name="battle_draft_confirm_selection">确认选择</string>
+    <string name="battle_draft_target_dialog_subtitle">点击玩家卡片进入下一步</string>
+    <string name="battle_draft_target_dialog_subtitle_with_actor">当前玩家：%1$s</string>
+    <string name="battle_draft_target_score">当前分：%1$s</string>
+    <string name="battle_draft_multiplier_dialog_title">选择番数（%1$d-%2$d番）</string>
+    <string name="battle_draft_multiplier_dialog_subtitle">确认本次事件番数</string>
+    <string name="battle_draft_multiplier_unit">番</string>
+    <string name="battle_draft_confirm_score">确认分数</string>
+
+    <string name="battle_settlement_title">本局结算</string>
+    <string name="battle_settlement_auto_message">已有 3 名玩家胡牌，是否结算本局并进入下一局？</string>
+    <string name="battle_settlement_confirm">结算</string>
+    <string name="battle_settlement_cancel">返回检查</string>
+    <string name="battle_settlement_close">关闭</string>
+    <string name="battle_settlement_horse_tag">马儿</string>
+    <string name="battle_settlement_total_score">总分：%1$s</string>
+    <string name="battle_settlement_victory">胜出</string>
+    <string name="battle_settlement_next_round">开始下一局</string>
+    <string name="battle_settlement_view_history">查看历史流水</string>
+
+    <string name="battle_draw_placeholder_title">流局结算</string>
+    <string name="battle_draw_placeholder_message">流局结算流程将在后续版本完善。</string>
+    <string name="battle_draw_placeholder_action">我知道了</string>
+    <string name="battle_draw_progress">未胡玩家 %1$d/%2$d</string>
+    <string name="battle_draw_choose_ting_title">%1$s：选择停牌状态</string>
+    <string name="battle_draw_choose_ting_subtitle">%1$s</string>
+    <string name="battle_draw_current_score">当前总分：%1$s</string>
+    <string name="battle_draw_choice_ting">停牌</string>
+    <string name="battle_draw_choice_ting_desc">选择停牌分，未停牌玩家将向你赔付。</string>
+    <string name="battle_draw_choice_no_ting">不停牌</string>
+    <string name="battle_draw_choice_no_ting_desc">本轮不参与停牌赔付。</string>
+    <string name="battle_draw_choose_score_title">%1$s：选择番数</string>
+    <string name="battle_draw_choose_score_subtitle">%1$s</string>
+    <string name="battle_draw_score_formula_hint">停牌分 = 底分 × 番数（%1$d-%2$d）</string>
+
+    <string name="players_page_title">玩家</string>
+    <string name="players_add_title">添加新玩家</string>
+    <string name="players_add_subtitle">邀请好友加入对局</string>
+    <string name="players_active_count">活跃玩家（%1$d）</string>
+    <string name="players_active_section">活跃玩家</string>
+    <string name="players_inactive_section">非活跃玩家（%1$d）</string>
+    <string name="players_status_active">活跃</string>
+    <string name="players_status_inactive">非活跃</string>
+    <string name="players_role_on_table">场上</string>
+    <string name="players_role_horse">马儿</string>
+    <string name="players_points_unit">PTS</string>
+    <string name="players_win_rate">胜率 %1$d%%</string>
+    <string name="players_total_games">对局 %1$d</string>
+    <string name="players_total_registered">总注册人数</string>
+    <string name="players_month_best">本月最佳</string>
+    <string name="players_mvp_tag">MVP</string>
+    <string name="players_empty_state">还没有玩家，点击上方卡片添加。</string>
+    <string name="players_stats_none">-</string>
+    <string name="players_dialog_title">添加玩家</string>
+    <string name="players_dialog_name_label">玩家姓名</string>
+    <string name="players_dialog_name_placeholder">请输入玩家姓名</string>
+    <string name="players_dialog_score_label">初始积分</string>
+    <string name="players_dialog_confirm">确认添加</string>
+    <string name="players_dialog_cancel">取消</string>
+    <string name="players_dialog_error_empty_name">请输入玩家姓名。</string>
+    <string name="players_dialog_error_duplicate_name">玩家姓名已存在。</string>
+    <string name="players_avatar_content_description">点击切换头像</string>
+
+    <string name="players_nav_history">历史</string>
+    <string name="players_nav_players">玩家</string>
+
+    <string name="players_name_li">李思远</string>
+    <string name="players_name_zhang">张若琳</string>
+    <string name="players_name_wang">王大伟</string>
+    <string name="players_name_chen">陈小萌</string>
+
+    <string name="players_icon_back">&lt;</string>
+    <string name="players_icon_more">...</string>
+    <string name="players_icon_add_user">+</string>
+    <string name="players_icon_chevron">&gt;</string>
+    <string name="players_icon_filter">=</string>
+    <string name="players_icon_edit">/</string>
+    <string name="players_icon_match">局</string>
+    <string name="players_icon_history">历</string>
+    <string name="players_icon_players">玩</string>
+    <string name="players_icon_stats">统</string>
+    <string name="players_icon_trend_up">+</string>
+    <string name="players_icon_trend_flat">~</string>
+    <string name="players_icon_trend_down">-</string>
+
+    <string name="settings_title">设置</string>
+    <string name="settings_profile_placeholder">人</string>
+    <string name="settings_section_game_rules">游戏规则</string>
+    <string name="settings_section_feedback">反馈</string>
+    <string name="settings_section_about">关于与支持</string>
+    <string name="settings_bottom_point_label">底分</string>
+    <string name="settings_capping_label">封顶倍数</string>
+    <string name="settings_haptic_label">震动反馈</string>
+    <string name="settings_version_label">版本号</string>
+    <string name="settings_version_value">v%1$s</string>
+    <string name="settings_clear_cache_label">清除缓存</string>
+    <string name="settings_clear_cache_suffix">删除</string>
+    <string name="settings_about_label">关于 Tactile Zen</string>
+    <string name="settings_about_suffix">信息</string>
+    <string name="settings_footer_image_desc">麻将牌背景图</string>
+    <string name="settings_footer_title">尽享博弈时光</string>
+    <string name="settings_footer_subtitle">愿好运常伴身旁。</string>
+    <string name="settings_stepper_decrease">-</string>
+    <string name="settings_stepper_increase">+</string>
+
+    <string name="placeholder_stats_description">统计页面正在建设中。</string>
+    <string name="placeholder_settings_description">设置页面正在建设中。</string>
+</resources>

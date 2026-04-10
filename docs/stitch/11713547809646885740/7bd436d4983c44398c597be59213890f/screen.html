@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-high": "#dbeaf9",
+                    "surface-variant": "#d2e5f7",
+                    "primary-fixed": "#bcf0ae",
+                    "tertiary-fixed-dim": "#c7d1ef",
+                    "primary-fixed-dim": "#aee2a0",
+                    "tertiary-dim": "#49536b",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-dim": "#2f5c29",
+                    "on-tertiary-fixed": "#333d55",
+                    "on-tertiary": "#f9f8ff",
+                    "inverse-surface": "#090f14",
+                    "secondary": "#3e6752",
+                    "on-surface": "#233442",
+                    "surface-container-low": "#ecf4fe",
+                    "primary": "#3b6934",
+                    "secondary-fixed-dim": "#b1dfc3",
+                    "outline": "#6b7d8d",
+                    "on-secondary": "#e6ffee",
+                    "tertiary-fixed": "#d5dffd",
+                    "inverse-on-surface": "#989da4",
+                    "on-error": "#fff7f6",
+                    "on-surface-variant": "#506170",
+                    "on-secondary-container": "#315a45",
+                    "secondary-container": "#bfedd1",
+                    "on-primary": "#e6ffdb",
+                    "on-error-container": "#752121",
+                    "surface-tint": "#3b6934",
+                    "on-primary-container": "#2f5c28",
+                    "on-secondary-fixed-variant": "#3b644e",
+                    "on-primary-fixed": "#1c4818",
+                    "secondary-dim": "#325b46",
+                    "tertiary": "#555f78",
+                    "on-background": "#233442",
+                    "on-tertiary-fixed-variant": "#4f5972",
+                    "error-container": "#fe8983",
+                    "tertiary-container": "#d5dffd",
+                    "surface": "#f6f9ff",
+                    "error-dim": "#4e0309",
+                    "on-secondary-fixed": "#1d4733",
+                    "primary-container": "#bcf0ae",
+                    "surface-bright": "#f6f9ff",
+                    "on-primary-fixed-variant": "#386631",
+                    "error": "#9f403d",
+                    "background": "#f6f9ff",
+                    "on-tertiary-container": "#465068",
+                    "surface-dim": "#c7ddf2",
+                    "outline-variant": "#a2b4c5",
+                    "surface-container": "#e4effc",
+                    "surface-container-highest": "#d2e5f7",
+                    "inverse-primary": "#b9eeab",
+                    "secondary-fixed": "#bfedd1"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "2xl": "1rem",
+                    "3xl": "1.5rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Manrope"],
+                    "label": ["Manrope"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .sculpted-shadow {
+            box-shadow: -6px -6px 12px rgba(255, 255, 255, 0.8), 8px 8px 16px rgba(35, 52, 66, 0.06);
+        }
+        .jade-gradient {
+            background: linear-gradient(135deg, #3b6934 0%, #2f5c29 100%);
+        }
+        .inner-shadow-well {
+            box-shadow: inset 4px 4px 8px rgba(35, 52, 66, 0.05), inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+        }
+        .stamp-rotate {
+            transform: rotate(-15deg);
+        }
+        body {
+            background-color: #f6f9ff;
+            color: #233442;
+            font-family: 'Manrope', sans-serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="bg-[#f6f9ff] dark:bg-slate-900 sticky top-0 z-40 flex justify-between items-center px-6 py-4 w-full shadow-[-6px_-6px_12px_rgba(255,255,255,0.8),8px_8px_16px_rgba(35,52,66,0.06)]">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#3b6934] dark:text-[#bcf0ae]" data-icon="grid_view">grid_view</span>
+<h1 class="font-['Plus_Jakarta_Sans'] font-bold text-lg text-[#3b6934] dark:text-[#bcf0ae]">Sichuan Mahjong</h1>
+</div>
+<div class="flex gap-4">
+<button class="material-symbols-outlined text-[#233442]/60 hover:bg-[#e4effc] p-2 rounded-full transition-colors" data-icon="settings">settings</button>
+</div>
+</header>
+<main class="max-w-4xl mx-auto px-4 pt-6 space-y-8">
+<!-- Player Grid 2x2 -->
+<section class="grid grid-cols-2 gap-4 md:gap-6">
+<!-- Player 1: 张大勇 -->
+<div class="relative bg-surface-container-lowest sculpted-shadow rounded-3xl p-4 flex flex-col items-center">
+<!-- Status Stamp -->
+<div class="absolute top-2 left-2 z-10 stamp-rotate border-4 border-error text-error font-headline font-extrabold px-3 py-1 rounded-xl text-lg pointer-events-none opacity-90">
+                    已自摸
+                </div>
+<div class="w-16 h-16 rounded-full overflow-hidden mb-3 ring-4 ring-surface-container">
+<img alt="张大勇" class="w-full h-full object-cover" data-alt="Close-up portrait of a middle-aged Chinese man with a friendly expression and short black hair in natural daylight." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCaaHEJ90uXL2L-CYeRABZgSXL_oTQwUSBc9xxGjEMiCv7QMuop0k6g977qnyMMr_rbK8e-G4KM3_J8G0LJks0vpxuboIbJY79ScCtCTzitDtRr4BfZHxrDU5F3C9UPFqvK-Khg_dGC_aNLFUcczRgvUAT--P6kE5j5kHvBRPluBGWH2Qo__3GYJqxh3df7UD9TaEOpXeT1TVDYEPg3a__aGVe1cKM2NYjxuWp7lBVhf8btWY-0se5-Z7782YV49wkTDKENdzTQpSPY"/>
+</div>
+<h3 class="font-headline font-bold text-on-surface">张大勇</h3>
+<div class="text-2xl font-headline font-extrabold text-primary my-1">+4,800</div>
+<div class="text-xs font-label text-on-surface-variant mb-3">总计: 128</div>
+<!-- Ma Players -->
+<div class="w-full bg-surface-container-low rounded-xl p-2 mb-4 inner-shadow-well">
+<div class="flex items-center gap-2">
+<img alt="王小妹" class="w-5 h-5 rounded-full object-cover" data-alt="Headshot of a young woman with long dark hair, smiling gently against a neutral background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2OJnPWL5VrL_KC37yeU3bs0Vq8Hi3m9uv_cFGCvLtZFijMlTUmjW_5XTe_ABsJ-hgmBPpwkN8V2DcfgNv6TT1cWxyXENOmTb-32mwIIz81ly_QlXSNTP_2mHJ3pyhK50hQOsFjhS9Ub0PvQ9sZ2IxuAvHnousmbE4tEtTT5GKTPC7lqhQNUY8GUTikp113DtMQo26lwmdQabYyK0kvnkT2iDKYVMQEAIe3uFCjKsyE9jnHkDrGla8Dqyrsq-PJJMrcEkuWM3-wQnn"/>
+<span class="text-[10px] font-medium text-on-surface-variant">王小妹 (马)</span>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="grid grid-cols-3 gap-2 w-full mt-auto">
+<button class="bg-surface-container text-on-surface py-2 rounded-xl text-sm font-bold hover:bg-surface-container-high transition-all active:scale-95">胡</button>
+<button class="bg-surface-container text-on-surface py-2 rounded-xl text-sm font-bold hover:bg-surface-container-high transition-all active:scale-95">自摸</button>
+<button class="bg-surface-container text-on-surface py-2 rounded-xl text-sm font-bold hover:bg-surface-container-high transition-all active:scale-95">杠</button>
+</div>
+</div>
+<!-- Player 2: 李俊 -->
+<div class="relative bg-surface-container-lowest sculpted-shadow rounded-3xl p-4 flex flex-col items-center">
+<div class="w-16 h-16 rounded-full overflow-hidden mb-3 ring-4 ring-surface-container">
+<img alt="李俊" class="w-full h-full object-cover" data-alt="Headshot of a young Asian man with clean-cut styling and a confident look, professional studio lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPZZ-ow1JT6qqpATLK1dJ1ZhBYcXHuVAKxSZekub57w9DtCRabSEZ_9FmDXpfswAwFOmEgFZoFNS9g3q8cM-NGgQ3XBNZm1FJL6H0bLNqgCBxjd535XfXE4zSrayzHRiMjtN-Tu70l0Sda_dHdiwb4vnAYZsLxgc9olHRRt18ikHiL7CrlZEi5OkmhCfLYbnql4ptnIdmG7gyZBgSSNbsQ70XmQoEiTQKVv06iQiYJECSOXdG_RvTSOa6rM5rpeabTUvv-ykdvWNSR"/>
+</div>
+<h3 class="font-headline font-bold text-on-surface">李俊</h3>
+<div class="text-2xl font-headline font-extrabold text-error my-1">-2,400</div>
+<div class="text-xs font-label text-on-surface-variant mb-3">总计: -64</div>
+<div class="w-full bg-surface-container-low rounded-xl p-2 mb-4 inner-shadow-well">
+<div class="flex items-center gap-2">
+<img alt="陈姐" class="w-5 h-5 rounded-full object-cover" data-alt="Smiling woman with bob-cut dark hair and bright expressive eyes in a casual outdoor setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCk9y7SrWMMkJ3LI4FK_mlsJYlNMpO6p-etH_1btA6kSZZHV0ce5LSyD8HMFvFwuTz6XYsKsNYxTwgHb3-UMCoK7hjH8q3PLA8tp42wb_G0lfPsd2hS1xNp6vMOzzNcmIvTG3FWpLTsroMPat6YJZMHOB7gZzrWQaIqJfCYd_OXrrJvdNwOSX7lGx1fziPKZ9hKoldnt_aj7ouifvpf7X15kWSaMV7oTDN58ptXVRnUJcHNtxcAffkwxD35i8ZYl0zEZCuoq9cypuJM"/>
+<span class="text-[10px] font-medium text-on-surface-variant">陈姐 (马)</span>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-2 w-full mt-auto">
+<button class="bg-surface-container text-on-surface py-2 rounded-xl text-sm font-bold hover:bg-surface-container-high transition-all active:scale-95">胡</button>
+<button class="bg-surface-container text-on-surface py-2 rounded-xl text-sm font-bold hover:bg-surface-container-high transition-all active:scale-95">自摸</button>
+<button class="bg-surface-container text-on-surface py-2 rounded-xl text-sm font-bold hover:bg-surface-container-high transition-all active:scale-95">杠</button>
+</div>
+</div>
+<!-- Player 3: 王强 -->
+<div class="relative bg-surface-container-lowest sculpted-shadow rounded-3xl p-4 flex flex-col items-center">
+<div class="absolute top-2 left-2 z-10 stamp-rotate border-4 border-primary text-primary font-headline font-extrabold px-3 py-1 rounded-xl text-lg pointer-events-none opacity-90">
+                    已胡
+                </div>
+<div class="w-16 h-16 rounded-full overflow-hidden mb-3 ring-4 ring-surface-container">
+<img alt="王强" class="w-full h-full object-cover" data-alt="Portrait of a mature man with distinguished features and glasses, soft warm lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBx4no8E_0QzNL1rHf6oqMINV4xgcWyd48tXmO_JMFfrxUjkEEx038Zvc6vODe9FCp0i1b8OU2FRDnLf8r2Fvfv_u9_uu_upgAu039Q5jb4q14XWoLEh0UjWutlCf5wm32XQOFQOonlv97XIuIqBKLDmpIDLcQdOKSYurz1gMlTvTujEywAk1oFHocHxfMbG9chBamuUmR7nFQ3sQTvNdGRB0lHFYncvkQJFAKo8j3vV7byM01UIdiLW3R5OJWGp_MEHFsGCk_07nxt"/>
+</div>
+<h3 class="font-headline font-bold text-on-surface">王强</h3>
+<div class="text-2xl font-headline font-extrabold text-primary my-1">+1,200</div>
+<div class="text-xs font-label text-on-surface-variant mb-3">总计: 42</div>
+<div class="w-full bg-surface-container-low rounded-xl p-2 mb-4 inner-shadow-well min-h-[44px] flex items-center justify-center">
+<span class="text-[10px] font-medium text-on-surface-variant/40">暂无关联</span>
+</div>
+<div class="grid grid-cols-3 gap-2 w-full mt-auto">
+<button class="bg-surface-container text-on-surface py-2 rounded-xl text-sm font-bold hover:bg-surface-container-high transition-all active:scale-95">胡</button>
+<button class="bg-surface-container text-on-surface py-2 rounded-xl text-sm font-bold hover:bg-surface-container-high transition-all active:scale-95">自摸</button>
+<button class="bg-surface-container text-on-surface py-2 rounded-xl text-sm font-bold hover:bg-surface-container-high transition-all active:scale-95">杠</button>
+</div>
+</div>
+<!-- Player 4: 赵敏 -->
+<div class="relative bg-surface-container-lowest sculpted-shadow rounded-3xl p-4 flex flex-col items-center">
+<div class="w-16 h-16 rounded-full overflow-hidden mb-3 ring-4 ring-surface-container">
+<img alt="赵敏" class="w-full h-full object-cover" data-alt="Artistic portrait of a stylish woman with sharp features and thoughtful expression, high contrast studio lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9qTqJaFpYHjXTp3YSkzg6o6Mdee-4jU8jfF6BPd6zWUOHnyqlKwHJ0LDp4tqy7C6G9XXYeemr00rgQ-hHUqqluuA39Qoc_b1uM6nOBRay7Qxw2jEKTo5X0cp82U7WxSMJlcblIAcwBTg-Du3GBVkg5XdhH6PQ33o2xigPkNom2aoBkHrCdTuFjHgra8hcHAPLnSC6uvahTNmB5POWYBj9fv393jvoHu-3u-1F7aE-KKB0eOgqAocIerBWJX1qcOGbtm1BBkimzGIH"/>
+</div>
+<h3 class="font-headline font-bold text-on-surface">赵敏</h3>
+<div class="text-2xl font-headline font-extrabold text-error my-1">-3,600</div>
+<div class="text-xs font-label text-on-surface-variant mb-3">总计: -106</div>
+<div class="w-full bg-surface-container-low rounded-xl p-2 mb-4 inner-shadow-well">
+<div class="flex items-center gap-2">
+<img alt="刘伟" class="w-5 h-5 rounded-full object-cover" data-alt="Man with a buzz cut and a warm smile, casual attire, natural daylight." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNpGgO8Zkw5OTh1PriAuujfY3HB_Dv7r2hGrcCxhKjOu9az0EXURHe3PS4KaalAkFvW6QBMGScajpm2j2h3WLVnfDG6AOULomFeCJr61cDNYgnsByRJWUVOYs1O5cJOP1zirt2naGwM8VKl7MS7B2BcP-GLkC7zFjbjPoGp7HTpiJX2h282DMwtORfzdlz8m20gUkU1-k99Cz_I2Ou7fAxlkYehW8hi6OFLpnUFxTyG1Zox57jrbEWNfCupU3lqAvka-vV0tUxZT-7"/>
+<span class="text-[10px] font-medium text-on-surface-variant">刘伟 (马)</span>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-2 w-full mt-auto">
+<button class="bg-surface-container text-on-surface py-2 rounded-xl text-sm font-bold hover:bg-surface-container-high transition-all active:scale-95">胡</button>
+<button class="bg-surface-container text-on-surface py-2 rounded-xl text-sm font-bold hover:bg-surface-container-high transition-all active:scale-95">自摸</button>
+<button class="bg-surface-container text-on-surface py-2 rounded-xl text-sm font-bold hover:bg-surface-container-high transition-all active:scale-95">杠</button>
+</div>
+</div>
+</section>
+<!-- 场外马儿 Section -->
+<section class="space-y-3">
+<div class="flex justify-between items-center px-2">
+<h2 class="font-headline font-bold text-on-surface-variant text-sm uppercase tracking-widest">场外马儿</h2>
+<span class="text-[10px] font-bold text-primary px-2 py-0.5 bg-primary-container rounded-full">3 Players</span>
+</div>
+<div class="flex gap-4 overflow-x-auto pb-4 px-2 no-scrollbar">
+<div class="flex-shrink-0 flex flex-col items-center gap-2 bg-surface-container-low p-3 rounded-2xl min-w-[80px] inner-shadow-well">
+<img alt="老李" class="w-10 h-10 rounded-full object-cover ring-2 ring-white" data-alt="Friendly looking elderly Asian man in a traditional setting with soft lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBx906S827XAGc31F6Dp3dcXoYO6b0DxRA9nahCZsq02kyYstPl7wUAfKVYaekKI6H5cLKF5z5jnnfn4so1SSpSaG70vnguUUXGfsf2dJMjmjd92Bye9rmpgrAiC5IZ1YPaDelFbBF79tWEg96es4V26QPjY1lU1NAC_m-P5oAR0TQ3ABAHq4_v35IsDy65-IGVYFhF7Nma4GjpMEMKz3HE4XXeTXKCeo-SOHjug86BGVLREYoRMyWXtPj_SxcORYRUNw9LZjG9trp8"/>
+<span class="text-[10px] font-bold">老李</span>
+</div>
+<div class="flex-shrink-0 flex flex-col items-center gap-2 bg-surface-container-low p-3 rounded-2xl min-w-[80px] inner-shadow-well">
+<img alt="周周" class="w-10 h-10 rounded-full object-cover ring-2 ring-white" data-alt="Young man with modern haircut and stylish glasses, outdoor urban background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9ohQ7Jgtz97mc7gnKU-IXXhuqBbkksZ8_t9dgmUsJohgMHvcNu4pZzUXybBzP2-PXxoVMlZug8_G0t7RmC7pL0hvNIuL2raZpLlRfv2s85pGMwNZGVXAYNrodIm454IGFWOe6oBoVHvUJ940bz21QQ9qgUfyuvDyDY-9wcXnaqCruHmRqpPFWPI53xhuxpMgPnT91xSZzje_kX74Ev-aW2yPR_RFKrAk1EL9Zp4wNQEmPylNNg220Mivjx5CUP2ZZD6BR-h7PZJHc"/>
+<span class="text-[10px] font-bold">周周</span>
+</div>
+<div class="flex-shrink-0 flex flex-col items-center gap-2 bg-surface-container-low p-3 rounded-2xl min-w-[80px] inner-shadow-well">
+<img alt="苏苏" class="w-10 h-10 rounded-full object-cover ring-2 ring-white" data-alt="Close up of a woman with vibrant personality and kind eyes, softly blurred nature background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBG81EOmuq2cio0UPRQkdkGr3gCiLRkqURUsH4qbfVDKbsZPfNRkpd5CtkF_XP98dJqhQJ3g_VrwYzcMJ09SNH7JFhXb2QVKZ4eMFsCqNl9CDth1fm6f7BWUw4My3-YFh_yJsc9dEk9CIPiJAKOb6ztcLnImBOXHf4AFDsPPkzj-MopPXveLONEGT3aS0RaXuGUw8RnRNRVGCrPgAHgbSAR1q6e8CjB3s1Xms7p0u8ymBGx78IeDn3PeYn-mzlxA2ujyDHZdftY7P_g"/>
+<span class="text-[10px] font-bold">苏苏</span>
+</div>
+<button class="flex-shrink-0 flex flex-col items-center justify-center gap-2 bg-white sculpted-shadow p-3 rounded-2xl min-w-[80px]">
+<span class="material-symbols-outlined text-primary" data-icon="add_circle">add_circle</span>
+<span class="text-[10px] font-bold">添加</span>
+</button>
+</div>
+</section>
+<!-- 实时流水 Section -->
+<section class="space-y-3">
+<h2 class="px-2 font-headline font-bold text-on-surface-variant text-sm uppercase tracking-widest">实时流水</h2>
+<div class="bg-surface-container-lowest sculpted-shadow rounded-3xl overflow-hidden">
+<div class="divide-y divide-surface-container-low">
+<!-- Event 1 -->
+<div class="flex items-center justify-between p-4 bg-surface-container-lowest">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="rocket_launch">rocket_launch</span>
+</div>
+<div>
+<div class="text-sm font-bold text-on-surface">张大勇 自摸</div>
+<div class="text-[10px] text-on-surface-variant">清一色 · 极品 · 32番</div>
+</div>
+</div>
+<div class="text-right">
+<div class="text-sm font-extrabold text-primary">+4,800</div>
+<div class="text-[10px] text-on-surface-variant">2分钟前</div>
+</div>
+</div>
+<!-- Event 2 -->
+<div class="flex items-center justify-between p-4 bg-surface-container-low/30">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-error-container/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-error" data-icon="gavel">gavel</span>
+</div>
+<div>
+<div class="text-sm font-bold text-on-surface">赵敏 点炮</div>
+<div class="text-[10px] text-on-surface-variant">给 王强</div>
+</div>
+</div>
+<div class="text-right">
+<div class="text-sm font-extrabold text-error">-1,200</div>
+<div class="text-[10px] text-on-surface-variant">5分钟前</div>
+</div>
+</div>
+<!-- Event 3 -->
+<div class="flex items-center justify-between p-4 bg-surface-container-lowest">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-secondary-container/50 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary" data-icon="token">token</span>
+</div>
+<div>
+<div class="text-sm font-bold text-on-surface">李俊 刮风</div>
+<div class="text-[10px] text-on-surface-variant">暗杠 · 赵敏/王强</div>
+</div>
+</div>
+<div class="text-right">
+<div class="text-sm font-extrabold text-primary">+600</div>
+<div class="text-[10px] text-on-surface-variant">12分钟前</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-white/70 backdrop-blur-xl rounded-t-[1.5rem] shadow-[0_-8px_40px_rgba(59,105,52,0.04)] z-50">
+<div class="flex flex-col items-center justify-center bg-[#bcf0ae] text-[#2f5c29] rounded-2xl px-5 py-1">
+<span class="material-symbols-outlined" data-icon="scoreboard" style="font-variation-settings: 'FILL' 1;">scoreboard</span>
+<span class="font-['Manrope'] text-[10px] font-semibold uppercase tracking-wider mt-1">Scoring</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#233442]/50 hover:text-[#3b6934] transition-all">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="font-['Manrope'] text-[10px] font-semibold uppercase tracking-wider mt-1">History</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#233442]/50 hover:text-[#3b6934] transition-all">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span class="font-['Manrope'] text-[10px] font-semibold uppercase tracking-wider mt-1">Players</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#233442]/50 hover:text-[#3b6934] transition-all">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span>
+<span class="font-['Manrope'] text-[10px] font-semibold uppercase tracking-wider mt-1">Stats</span>
+</div>
+</nav>
+</body></html>

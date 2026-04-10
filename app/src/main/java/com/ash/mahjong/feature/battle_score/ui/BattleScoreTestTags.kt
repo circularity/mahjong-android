@@ -1,0 +1,30 @@
+package com.ash.mahjong.feature.battle_score.ui
+
+object BattleScoreTestTags {
+    const val TOP_BAR = "battle_top_bar"
+    const val PLAYERS_GRID = "battle_players_grid"
+    const val HORSE_SECTION = "battle_horse_section"
+    const val HORSE_BINDING_DIALOG = "battle_horse_binding_dialog"
+    const val LIVE_LOG_SECTION = "battle_live_log_section"
+    const val BOTTOM_BAR = "battle_bottom_bar"
+    const val FLOATING_ACTION = "battle_floating_action"
+    const val GANG_TYPE_DIALOG = "battle_gang_type_dialog"
+    const val TARGET_DIALOG = "battle_target_dialog"
+    const val MULTIPLIER_DIALOG = "battle_multiplier_dialog"
+    const val DRAW_SETTLEMENT_DIALOG = "battle_draw_settlement_dialog"
+    const val DRAW_TING_CHOICE_DIALOG = "battle_draw_ting_choice_dialog"
+    const val DRAW_MULTIPLIER_DIALOG = "battle_draw_multiplier_dialog"
+    private const val BOTTOM_TAB_ICON_PREFIX = "battle_bottom_tab_icon_"
+    private const val MULTIPLIER_OPTION_PREFIX = "battle_multiplier_option_"
+    private const val DRAW_MULTIPLIER_OPTION_PREFIX = "battle_draw_multiplier_option_"
+
+    fun huButton(playerId: Int): String = "player_${playerId}_hu_button"
+    fun gangButton(playerId: Int): String = "player_${playerId}_gang_button"
+    fun zimoButton(playerId: Int): String = "player_${playerId}_zimo_button"
+    fun winOrderBadge(playerId: Int): String = "player_${playerId}_win_order_badge"
+    fun horseCard(playerId: Int): String = "horse_${playerId}_card"
+    fun horseBindingTarget(playerId: Int): String = "horse_binding_target_${playerId}"
+    fun bottomTabIcon(index: Int): String = "$BOTTOM_TAB_ICON_PREFIX$index"
+    fun multiplierOption(value: Int): String = "$MULTIPLIER_OPTION_PREFIX$value"
+    fun drawMultiplierOption(value: Int): String = "$DRAW_MULTIPLIER_OPTION_PREFIX$value"
+}

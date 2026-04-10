@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-variant": "#d2e5f7",
+              "surface-container": "#e4effc",
+              "outline-variant": "#a2b4c5",
+              "surface-dim": "#c7ddf2",
+              "tertiary-fixed-dim": "#c7d1ef",
+              "secondary-fixed-dim": "#b1dfc3",
+              "on-error-container": "#752121",
+              "on-secondary": "#e6ffee",
+              "outline": "#6b7d8d",
+              "on-secondary-container": "#315a45",
+              "surface-container-low": "#ecf4fe",
+              "surface-container-highest": "#d2e5f7",
+              "primary-fixed-dim": "#aee2a0",
+              "secondary-fixed": "#bfedd1",
+              "surface-container-lowest": "#ffffff",
+              "error": "#9f403d",
+              "tertiary-dim": "#49536b",
+              "on-primary-container": "#2f5c28",
+              "on-tertiary-fixed-variant": "#4f5972",
+              "on-secondary-fixed": "#1d4733",
+              "on-surface-variant": "#506170",
+              "inverse-on-surface": "#989da4",
+              "on-tertiary-fixed": "#333d55",
+              "tertiary-fixed": "#d5dffd",
+              "on-primary-fixed": "#1c4818",
+              "on-primary-fixed-variant": "#386631",
+              "secondary": "#3e6752",
+              "surface-container-high": "#dbeaf9",
+              "primary-dim": "#2f5c29",
+              "tertiary-container": "#d5dffd",
+              "inverse-surface": "#090f14",
+              "on-background": "#233442",
+              "secondary-dim": "#325b46",
+              "on-secondary-fixed-variant": "#3b644e",
+              "surface-bright": "#f6f9ff",
+              "on-tertiary": "#f9f8ff",
+              "secondary-container": "#bfedd1",
+              "background": "#f6f9ff",
+              "surface": "#f6f9ff",
+              "on-error": "#fff7f6",
+              "primary-container": "#bcf0ae",
+              "inverse-primary": "#b9eeab",
+              "on-surface": "#233442",
+              "primary": "#3b6934",
+              "on-tertiary-container": "#465068",
+              "on-primary": "#e6ffdb",
+              "error-dim": "#4e0309",
+              "primary-fixed": "#bcf0ae",
+              "tertiary": "#555f78",
+              "error-container": "#fe8983",
+              "surface-tint": "#3b6934"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Manrope"],
+              "label": ["Manrope"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .neumorphic-card {
+            background: #ffffff;
+            box-shadow: -6px -6px 12px rgba(255, 255, 255, 0.8),
+                        8px 8px 16px rgba(35, 52, 66, 0.06);
+        }
+        .neumorphic-pressed {
+            box-shadow: inset -4px -4px 8px rgba(255, 255, 255, 0.9),
+                        inset 4px 4px 8px rgba(35, 52, 66, 0.08);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface font-body text-on-background min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-6 py-4 h-16 bg-[#f6f9ff] dark:bg-slate-900 shadow-sm shadow-[inset_0_-1px_0_0_rgba(0,0,0,0.05)]">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#3b6934] dark:text-emerald-400 scale-95 active:scale-90 duration-200 cursor-pointer" data-icon="close">close</span>
+<h1 class="font-plus-jakarta text-xl font-bold tracking-tight text-[#3b6934] dark:text-emerald-400">Select Gang</h1>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="more_vert">more_vert</span>
+</div>
+</header>
+<!-- Main Content (Background Dashboard Preview) -->
+<main class="flex-1 pt-20 pb-32 px-4 relative overflow-hidden">
+<!-- Background "Dashboard" Mockup - Submerged elements -->
+<div class="space-y-6 opacity-40 blur-[2px] pointer-events-none">
+<div class="grid grid-cols-2 gap-4">
+<div class="h-32 bg-surface-container rounded-xl neumorphic-pressed"></div>
+<div class="h-32 bg-surface-container rounded-xl neumorphic-pressed"></div>
+</div>
+<div class="h-64 bg-surface-container rounded-xl neumorphic-pressed"></div>
+</div>
+<!-- Dialog Overlay -->
+<div class="absolute inset-0 z-10 flex items-center justify-center px-6">
+<!-- Modal Container -->
+<div class="w-full max-w-md neumorphic-card rounded-[2.5rem] p-8 flex flex-col items-center">
+<!-- Title & Subtitle -->
+<div class="text-center mb-8">
+<h2 class="font-headline text-2xl font-extrabold text-on-background tracking-tight">选择杠牌类型</h2>
+<p class="font-body text-sm text-on-surface-variant mt-1 font-medium">确认杠牌得分规则</p>
+</div>
+<!-- Three Large Buttons Grid -->
+<div class="w-full space-y-4 pb-4">
+<!-- 点杠 (Dian Gang) -->
+<button class="w-full group bg-[#F0F4F8] rounded-[2rem] p-5 flex items-center gap-5 transition-all duration-300 active:scale-[0.96] shadow-[6px_6px_12px_#d1d9e6,-6px_-6px_12px_#ffffff] hover:shadow-[inset_4px_4px_8px_#d1d9e6,inset_-4px_-4px_8px_#ffffff] border border-white/40">
+<div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-[4px_4px_8px_rgba(0,0,0,0.05)] text-[#3b6934]">
+<span class="material-symbols-outlined text-on-secondary-container text-3xl" data-icon="filter_center_focus" data-weight="fill" style="font-variation-settings: 'FILL' 1;">filter_center_focus</span>
+</div>
+<div class="text-left">
+<span class="block font-headline font-bold text-lg text-on-surface">点杠 (Dian Gang)</span>
+<span class="block font-body text-[13px] text-on-surface-variant">放杠者 -2, 杠牌者 +2</span>
+</div>
+<div class="ml-auto opacity-0 group-focus:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</button>
+<!-- 巴杠 (Ba Gang) -->
+<button class="w-full group bg-[#E8F5E9] rounded-[2rem] p-5 flex items-center gap-5 transition-all duration-300 active:scale-[0.96] shadow-[6px_6px_12px_#c8d6c9,-6px_-6px_12px_#ffffff] hover:shadow-[inset_4px_4px_8px_#c8d6c9,inset_-4px_-4px_8px_#ffffff] border border-white/40">
+<div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-[4px_4px_8px_rgba(0,0,0,0.05)] text-[#2d5a27]">
+<span class="material-symbols-outlined text-on-primary-container text-3xl" data-icon="layers" data-weight="fill" style="font-variation-settings: 'FILL' 1;">layers</span>
+</div>
+<div class="text-left">
+<span class="block font-headline font-bold text-lg text-on-surface">巴杠 (Ba Gang)</span>
+<span class="block font-body text-[13px] text-on-surface-variant">每人 -1, 杠牌者 +N</span>
+</div>
+<div class="ml-auto opacity-0 group-focus:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</button>
+<!-- 暗杠 (An Gang) -->
+<button class="w-full group bg-[#EEF0F6] rounded-[2rem] p-5 flex items-center gap-5 transition-all duration-300 active:scale-[0.96] shadow-[6px_6px_12px_#d2d5e0,-6px_-6px_12px_#ffffff] hover:shadow-[inset_4px_4px_8px_#d2d5e0,inset_-4px_-4px_8px_#ffffff] border border-white/40">
+<div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-[4px_4px_8px_rgba(0,0,0,0.05)] text-[#4a5568]">
+<span class="material-symbols-outlined text-on-tertiary-container text-3xl" data-icon="visibility_off" data-weight="fill" style="font-variation-settings: 'FILL' 1;">visibility_off</span>
+</div>
+<div class="text-left">
+<span class="block font-headline font-bold text-lg text-on-surface">暗杠 (An Gang)</span>
+<span class="block font-body text-[13px] text-on-surface-variant">每人 -2, 杠牌者 +2N</span>
+</div>
+<div class="ml-auto opacity-0 group-focus:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</button>
+</div>
+<!-- Footer Actions -->
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-8 pt-4 bg-[#f6f9ff]/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-t-[2.5rem] border-t border-white/20 shadow-[0_-8px_30px_rgba(0,0,0,0.04)]">
+<!-- Game Tab (Active) -->
+<a class="flex flex-col items-center justify-center bg-[#bcf0ae] dark:bg-emerald-900/40 text-[#2f5c29] dark:text-emerald-200 rounded-2xl px-5 py-2 transition-all tap-highlight-none active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="casino">casino</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-widest mt-1">Game</span>
+</a>
+<!-- History Tab -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:opacity-80 transition-transform active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-widest mt-1">History</span>
+</a>
+<!-- Stats Tab -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:opacity-80 transition-transform active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-widest mt-1">Stats</span>
+</a>
+<!-- Settings Tab -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:opacity-80 transition-transform active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-widest mt-1">Settings</span>
+</a>
+</nav>
+<!-- Visual Texture Overlay -->
+<div class="fixed inset-0 pointer-events-none opacity-20 z-0 bg-[radial-gradient(#a2b4c5_0.5px,transparent_0.5px)] [background-size:24px_24px]"></div>
+</body></html>
