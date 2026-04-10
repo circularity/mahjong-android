@@ -4,6 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ash.mahjong.LogUtils
 import com.ash.mahjong.R
+import com.ash.mahjong.data.battle.BattleRecordRepository
+import com.ash.mahjong.data.battle.NoOpBattleRecordRepository
+import com.ash.mahjong.data.battle.PersistedBattleEventType
+import com.ash.mahjong.data.battle.SessionLineupPlayer
+import com.ash.mahjong.data.battle.SettledBattleEvent
+import com.ash.mahjong.data.battle.SettledBattleRound
+import com.ash.mahjong.data.battle.SettledPlayerState
 import com.ash.mahjong.data.player.Player
 import com.ash.mahjong.data.player.PlayerAnimalAvatarCatalog
 import com.ash.mahjong.data.player.PlayerRole
@@ -44,7 +51,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class BattleScoreViewModel @Inject constructor(
     private val playerRepository: PlayerRepository,
-    private val gameSettingsRepository: GameSettingsRepository
+    private val gameSettingsRepository: GameSettingsRepository,
+    private val battleRecordRepository: BattleRecordRepository = NoOpBattleRecordRepository
 ) : ViewModel() {
 
     private val scoreCalculator = BattleScoreCalculator()
@@ -54,6 +62,7 @@ class BattleScoreViewModel @Inject constructor(
     private val winOrderByPlayerId = mutableMapOf<Int, Int>()
     private val undoStack = mutableListOf<RoundSnapshot>()
     private val roundScoringHistory = mutableListOf<RoundScoringRecord>()
+    private val pendingRoundEvents = mutableListOf<PendingRoundEvent>()
 
     private var latestPlayers: List<Player> = emptyList()
     private var latestAllPlayers: List<Player> = emptyList()
@@ -61,6 +70,7 @@ class BattleScoreViewModel @Inject constructor(
     private var latestSettings: GameSettings = GameSettings()
     private var nextLiveLogId: Int = 0
     private var nextWinOrder: Int = 1
+    private var nextActionGroupId: Long = 1
 
     private val _uiState = MutableStateFlow(createInitialState())
     val uiState: StateFlow<BattleScoreUiState> = _uiState.asStateFlow()
@@ -257,6 +267,19 @@ class BattleScoreViewModel @Inject constructor(
             playerRepository.updateHorseBinding(
                 playerId = draft.horseId,
                 boundOnTablePlayerId = targetPlayerId
+            )
+            recordRoundEvent(
+                event = PendingRoundEvent(
+                    actionGroupId = nextActionGroupId++,
+                    eventType = PersistedBattleEventType.HORSE_BIND,
+                    actorPlayerId = draft.horseId,
+                    multiplier = null,
+                    payloadJson = buildHorseBindingPayloadJson(
+                        horseId = draft.horseId,
+                        targetPlayerId = targetPlayerId
+                    ),
+                    deltaByPlayerId = emptyMap()
+                )
             )
             updateLatestHorseBindingLocally(
                 horseId = draft.horseId,
@@ -515,6 +538,18 @@ class BattleScoreViewModel @Inject constructor(
                 deltaByPlayerId = deltaByPlayerId
             )
         )
+        recordRoundEvent(
+            event = PendingRoundEvent(
+                actionGroupId = nextActionGroupId++,
+                eventType = scoringAction.actionType.toPersistedEventType(),
+                actorPlayerId = draft.actorId,
+                multiplier = selectedMultiplier,
+                payloadJson = buildScoringPayloadJson(
+                    targetIds = scoringAction.targetIds
+                ),
+                deltaByPlayerId = deltaByPlayerId
+            )
+        )
 
         val actorDelta = deltaByPlayerId[draft.actorId] ?: 0
         val liveLog = LiveLogItemUiModel(
@@ -623,8 +658,10 @@ class BattleScoreViewModel @Inject constructor(
 
         nextWinOrder = 1
         nextLiveLogId = 0
+        nextActionGroupId = 1
         undoStack.clear()
         roundScoringHistory.clear()
+        pendingRoundEvents.clear()
 
         _uiState.update { state ->
             state.copy(
@@ -876,6 +913,41 @@ class BattleScoreViewModel @Inject constructor(
             drawLog?.let(::add)
             addAll(gangRefundLogs)
         }
+        val settlementActionGroupId = nextActionGroupId++
+        refundedGangRecords.forEach { record ->
+            val refundedDeltaByPlayerId = record.deltaByPlayerId.mapValues { (_, delta) -> -delta }
+            recordRoundEvent(
+                event = PendingRoundEvent(
+                    actionGroupId = settlementActionGroupId,
+                    eventType = PersistedBattleEventType.GANG_REFUND,
+                    actorPlayerId = record.actorId,
+                    multiplier = FIXED_GANG_MULTIPLIER,
+                    payloadJson = buildScoringPayloadJson(
+                        targetIds = record.deltaByPlayerId.keys
+                            .filter { playerId -> playerId != record.actorId }
+                    ),
+                    deltaByPlayerId = refundedDeltaByPlayerId
+                )
+            )
+        }
+        val drawDeltaByPlayerId = orderedPendingPlayerIds.associateWith { playerId ->
+            deltaByPlayerId[playerId] ?: 0
+        }
+        if (drawDeltaByPlayerId.isNotEmpty()) {
+            recordRoundEvent(
+                event = PendingRoundEvent(
+                    actionGroupId = settlementActionGroupId,
+                    eventType = PersistedBattleEventType.DRAW_SETTLEMENT,
+                    actorPlayerId = actorId,
+                    multiplier = null,
+                    payloadJson = buildDrawSettlementPayloadJson(
+                        tingPlayerIds = tingPlayerIds,
+                        nonTingPlayerIds = nonTingPlayerIds
+                    ),
+                    deltaByPlayerId = drawDeltaByPlayerId
+                )
+            )
+        }
         val remainingSlots = (MAX_LOG_COUNT - settlementLogs.size).coerceAtLeast(0)
         val updatedLogs = if (settlementLogs.isEmpty()) {
             uiState.value.liveLogs
@@ -908,7 +980,14 @@ class BattleScoreViewModel @Inject constructor(
             dismissSettlementPrompt()
             return
         }
-        startNextRound()
+        viewModelScope.launch {
+            try {
+                persistCurrentRound()
+            } catch (e: Exception) {
+                LogUtils.e(throwable = e) { "Persist settled round failed" }
+            }
+            startNextRound()
+        }
     }
 
     private fun startNextRound() {
@@ -922,8 +1001,10 @@ class BattleScoreViewModel @Inject constructor(
         }
         winOrderByPlayerId.clear()
         nextWinOrder = 1
+        nextActionGroupId = 1
         undoStack.clear()
         roundScoringHistory.clear()
+        pendingRoundEvents.clear()
 
         _uiState.update { state ->
             state.copy(
@@ -979,8 +1060,11 @@ class BattleScoreViewModel @Inject constructor(
         winOrderByPlayerId.putAll(snapshot.winOrderByPlayerId)
         roundScoringHistory.clear()
         roundScoringHistory.addAll(snapshot.roundScoringHistory)
+        pendingRoundEvents.clear()
+        pendingRoundEvents.addAll(snapshot.pendingRoundEvents)
         nextLiveLogId = snapshot.nextLiveLogId
         nextWinOrder = snapshot.nextWinOrder
+        nextActionGroupId = snapshot.nextActionGroupId
 
         _uiState.update { state ->
             state.copy(
@@ -1003,13 +1087,103 @@ class BattleScoreViewModel @Inject constructor(
                 statusByPlayerId = statusByPlayerId.toMap(),
                 winOrderByPlayerId = winOrderByPlayerId.toMap(),
                 roundScoringHistory = roundScoringHistory.toList(),
+                pendingRoundEvents = pendingRoundEvents.toList(),
                 liveLogs = uiState.value.liveLogs,
                 drawSettlementDraft = uiState.value.drawSettlementDraft,
                 settlementPrompt = uiState.value.settlementPrompt,
                 nextLiveLogId = nextLiveLogId,
-                nextWinOrder = nextWinOrder
+                nextWinOrder = nextWinOrder,
+                nextActionGroupId = nextActionGroupId
             )
         )
+    }
+
+    private suspend fun persistCurrentRound() {
+        if (pendingRoundEvents.isEmpty()) {
+            return
+        }
+        val onTablePlayers = selectActiveOnTablePlayers(latestAllPlayers)
+        if (onTablePlayers.size < BATTLE_PLAYER_LIMIT) {
+            return
+        }
+        val activeHorses = selectActiveHorses(latestAllPlayers)
+        val lineupPlayers = buildList {
+            onTablePlayers.forEachIndexed { index, player ->
+                add(
+                    SessionLineupPlayer(
+                        playerId = player.id,
+                        seatIndex = index,
+                        playerRole = player.playerRole.name,
+                        nameSnapshot = player.name,
+                        avatarKeySnapshot = player.avatarKey,
+                        initialScore = player.score
+                    )
+                )
+            }
+            activeHorses.forEachIndexed { index, player ->
+                add(
+                    SessionLineupPlayer(
+                        playerId = player.id,
+                        seatIndex = onTablePlayers.size + index,
+                        playerRole = player.playerRole.name,
+                        nameSnapshot = player.name,
+                        avatarKeySnapshot = player.avatarKey,
+                        initialScore = player.score
+                    )
+                )
+            }
+        }
+        val activePlayers = latestAllPlayers.filter { player -> player.isActive }
+        val playerStates = activePlayers.map { player ->
+            SettledPlayerState(
+                playerId = player.id,
+                totalScore = totalScoreByPlayerId[player.id] ?: player.score,
+                roundDelta = roundDeltaByPlayerId[player.id] ?: 0,
+                status = statusByPlayerId[player.id]?.name ?: PlayerStatus.ACTIVE.name,
+                winOrder = winOrderByPlayerId[player.id]
+            )
+        }
+        battleRecordRepository.persistSettledRound(
+            SettledBattleRound(
+                roundNo = uiState.value.currentRound,
+                lineupPlayers = lineupPlayers,
+                basePoint = latestSettings.basePoint,
+                cappingMultiplier = latestSettings.cappingMultiplier,
+                events = pendingRoundEvents.map { event ->
+                    SettledBattleEvent(
+                        actionGroupId = event.actionGroupId,
+                        eventType = event.eventType,
+                        actorPlayerId = event.actorPlayerId,
+                        multiplier = event.multiplier,
+                        payloadJson = event.payloadJson,
+                        deltaByPlayerId = event.deltaByPlayerId
+                    )
+                },
+                playerStates = playerStates
+            )
+        )
+    }
+
+    private fun recordRoundEvent(event: PendingRoundEvent) {
+        pendingRoundEvents.add(event)
+    }
+
+    private fun buildScoringPayloadJson(targetIds: List<Int>): String {
+        val targets = targetIds.joinToString(separator = ",")
+        return "{\"targetIds\":[$targets]}"
+    }
+
+    private fun buildHorseBindingPayloadJson(horseId: Int, targetPlayerId: Int): String {
+        return "{\"horseId\":$horseId,\"targetPlayerId\":$targetPlayerId}"
+    }
+
+    private fun buildDrawSettlementPayloadJson(
+        tingPlayerIds: List<Int>,
+        nonTingPlayerIds: List<Int>
+    ): String {
+        val tingIds = tingPlayerIds.joinToString(separator = ",")
+        val nonTingIds = nonTingPlayerIds.joinToString(separator = ",")
+        return "{\"tingPlayerIds\":[$tingIds],\"nonTingPlayerIds\":[$nonTingIds]}"
     }
 
     private fun createInitialState(): BattleScoreUiState {
@@ -1356,22 +1530,43 @@ private fun PendingScoringAction.toLiveLogActionType(): LiveLogActionType {
     }
 }
 
+private fun BattleScoreActionType.toPersistedEventType(): PersistedBattleEventType {
+    return when (this) {
+        BattleScoreActionType.HU -> PersistedBattleEventType.HU
+        BattleScoreActionType.ZIMO -> PersistedBattleEventType.ZIMO
+        BattleScoreActionType.GANG_DIAN -> PersistedBattleEventType.GANG_DIAN
+        BattleScoreActionType.GANG_BA -> PersistedBattleEventType.GANG_BA
+        BattleScoreActionType.GANG_AN -> PersistedBattleEventType.GANG_AN
+    }
+}
+
 private data class RoundSnapshot(
     val totalScoreByPlayerId: Map<Int, Int>,
     val roundDeltaByPlayerId: Map<Int, Int>,
     val statusByPlayerId: Map<Int, PlayerStatus>,
     val winOrderByPlayerId: Map<Int, Int>,
     val roundScoringHistory: List<RoundScoringRecord>,
+    val pendingRoundEvents: List<PendingRoundEvent>,
     val liveLogs: List<LiveLogItemUiModel>,
     val drawSettlementDraft: DrawSettlementDraftUiState?,
     val settlementPrompt: SettlementPromptUiState?,
     val nextLiveLogId: Int,
-    val nextWinOrder: Int
+    val nextWinOrder: Int,
+    val nextActionGroupId: Long
 )
 
 private data class RoundScoringRecord(
     val actionType: BattleScoreActionType,
     val actorId: Int,
+    val deltaByPlayerId: Map<Int, Int>
+)
+
+private data class PendingRoundEvent(
+    val actionGroupId: Long,
+    val eventType: PersistedBattleEventType,
+    val actorPlayerId: Int?,
+    val multiplier: Int?,
+    val payloadJson: String?,
     val deltaByPlayerId: Map<Int, Int>
 )
 

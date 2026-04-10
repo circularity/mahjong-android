@@ -25,8 +25,6 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -38,6 +36,7 @@ import com.ash.mahjong.R
 import com.ash.mahjong.feature.battle_score.state.PlayerCardUiModel
 import com.ash.mahjong.feature.battle_score.state.PlayerStatus
 import com.ash.mahjong.feature.battle_score.ui.BattleScoreTestTags
+import com.ash.mahjong.ui.avatar.PlayerAvatarVisual
 import com.ash.mahjong.ui.theme.MahjongDesign
 import java.util.Locale
 
@@ -131,12 +130,12 @@ private fun PlayerCard(
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                text = player.avatarEmoji.ifBlank { player.name.take(1) },
-                                style = MaterialTheme.typography.headlineMedium,
-                                modifier = Modifier.semantics {
-                                    contentDescription = avatarContentDescription
-                                }
+                            PlayerAvatarVisual(
+                                avatarKey = player.avatarKey,
+                                avatarEmoji = player.avatarEmoji,
+                                fallbackText = player.name.take(1),
+                                contentDescription = avatarContentDescription,
+                                textStyle = MaterialTheme.typography.headlineMedium
                             )
                         }
 

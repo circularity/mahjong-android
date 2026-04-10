@@ -155,7 +155,9 @@ fun PlayerSwapDialog(
                             SwapItemCard(
                                 title = player.name,
                                 subtitle = player.totalScore,
-                                avatarText = player.avatarEmoji.ifBlank { player.name.take(1) },
+                                avatarKey = player.avatarKey,
+                                avatarEmoji = player.avatarEmoji,
+                                avatarFallbackText = player.name.take(1),
                                 rankLabel = (index + 1).toString(),
                                 isMuted = false,
                                 isDragging = draggingSource == key,
@@ -185,7 +187,9 @@ fun PlayerSwapDialog(
                             SwapItemCard(
                                 title = horse.name,
                                 subtitle = horse.totalScore,
-                                avatarText = horse.avatarEmoji.ifBlank { horse.name.take(1) },
+                                avatarKey = horse.avatarKey,
+                                avatarEmoji = horse.avatarEmoji,
+                                avatarFallbackText = horse.name.take(1),
                                 rankLabel = null,
                                 isMuted = true,
                                 isDragging = draggingSource == key,

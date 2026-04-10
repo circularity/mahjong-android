@@ -16,7 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.ash.mahjong.feature.battle_score.ui.BattleScoreTestTags
@@ -47,7 +47,8 @@ fun BattleBottomBar(
             for ((index, item) in items.withIndex()) {
                 BottomTab(
                     label = stringResource(item.labelRes),
-                    iconRes = item.iconRes,
+                    selectedIcon = item.selectedIcon,
+                    unselectedIcon = item.unselectedIcon,
                     selected = item.selected,
                     iconTag = BattleScoreTestTags.bottomTabIcon(index),
                     modifier = Modifier.weight(1f),
@@ -61,7 +62,8 @@ fun BattleBottomBar(
 @Composable
 private fun BottomTab(
     label: String,
-    iconRes: Int,
+    selectedIcon: ImageVector,
+    unselectedIcon: ImageVector,
     selected: Boolean,
     iconTag: String,
     modifier: Modifier = Modifier,
@@ -89,7 +91,7 @@ private fun BottomTab(
             verticalArrangement = Arrangement.Center
         ) {
             Icon(
-                painter = painterResource(id = iconRes),
+                imageVector = if (selected) selectedIcon else unselectedIcon,
                 contentDescription = label,
                 tint = color,
                 modifier = Modifier

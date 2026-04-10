@@ -220,6 +220,23 @@
     <string name="settings_stepper_decrease">-</string>
     <string name="settings_stepper_increase">+</string>
 
+    <string name="stats_page_title">战绩统计</string>
+    <string name="stats_players_compare_title">玩家数据对比</string>
+    <string name="stats_empty_title">暂无已结算对局</string>
+    <string name="stats_empty_subtitle">请先完成至少一局结算，再查看统计数据。</string>
+    <string name="stats_total_score_label">总分</string>
+    <string name="stats_win_rate_label">胜率</string>
+    <string name="stats_metric_zimo_rounds">自摸</string>
+    <string name="stats_metric_hu_rounds">胡牌</string>
+    <string name="stats_metric_gang_rounds">杠</string>
+    <string name="stats_metric_win_rounds">胜局</string>
+    <string name="stats_metric_dianpao_rounds">点炮</string>
+    <string name="stats_metric_total_rounds">总局</string>
+    <string name="stats_player_rounds_subtitle_template">共 %1$d 局</string>
+    <string name="stats_rounds_win_template">对局：%1$d  胜局：%2$d  胜率：%3$s</string>
+    <string name="stats_delta_template">累计得失：%1$s  局均得失：%2$s</string>
+    <string name="stats_recent_rounds_template">最近局得失：%1$s</string>
+
     <string name="placeholder_stats_description">统计页面正在建设中。</string>
     <string name="placeholder_settings_description">设置页面正在建设中。</string>
 </resources>

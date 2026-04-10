@@ -252,7 +252,15 @@ class BattleScoreFlowUiTest {
     fun horsesExist_showsHorseSectionBetweenPlayersAndLiveLog() {
         val state = baseState(
             horses = listOf(
-                HorseUiModel(id = 6, name = "马儿A", boundOnTablePlayerName = "A")
+                HorseUiModel(
+                    id = 6,
+                    name = "马儿A",
+                    avatarKey = "horse_6",
+                    avatarEmoji = "H6",
+                    boundOnTablePlayerName = "A",
+                    roundDelta = "+0",
+                    totalScore = "100"
+                )
             )
         )
         composeRule.setContent {
@@ -293,8 +301,24 @@ class BattleScoreFlowUiTest {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val state = baseState(
             horses = listOf(
-                HorseUiModel(id = 6, name = "马儿A", boundOnTablePlayerName = "A"),
-                HorseUiModel(id = 7, name = "马儿B", boundOnTablePlayerName = null)
+                HorseUiModel(
+                    id = 6,
+                    name = "马儿A",
+                    avatarKey = "horse_6",
+                    avatarEmoji = "H6",
+                    boundOnTablePlayerName = "A",
+                    roundDelta = "+0",
+                    totalScore = "100"
+                ),
+                HorseUiModel(
+                    id = 7,
+                    name = "马儿B",
+                    avatarKey = "horse_7",
+                    avatarEmoji = "H7",
+                    boundOnTablePlayerName = null,
+                    roundDelta = "+0",
+                    totalScore = "100"
+                )
             )
         )
         composeRule.setContent {
@@ -320,7 +344,17 @@ class BattleScoreFlowUiTest {
     fun horseCard_click_dispatchesStartBindingIntent() {
         val intents = mutableListOf<BattleScoreIntent>()
         val state = baseState(
-            horses = listOf(HorseUiModel(id = 6, name = "马儿A", boundOnTablePlayerName = null))
+            horses = listOf(
+                HorseUiModel(
+                    id = 6,
+                    name = "马儿A",
+                    avatarKey = "horse_6",
+                    avatarEmoji = "H6",
+                    boundOnTablePlayerName = null,
+                    roundDelta = "+0",
+                    totalScore = "100"
+                )
+            )
         )
         composeRule.setContent {
             MahjongTheme {
@@ -340,7 +374,17 @@ class BattleScoreFlowUiTest {
     fun horseBindingDraft_showsDialogAndSelectTarget_dispatchesIntent() {
         val intents = mutableListOf<BattleScoreIntent>()
         val state = baseState(
-            horses = listOf(HorseUiModel(id = 6, name = "马儿A", boundOnTablePlayerName = null)),
+            horses = listOf(
+                HorseUiModel(
+                    id = 6,
+                    name = "马儿A",
+                    avatarKey = "horse_6",
+                    avatarEmoji = "H6",
+                    boundOnTablePlayerName = null,
+                    roundDelta = "+0",
+                    totalScore = "100"
+                )
+            ),
             horseBindingDraft = HorseBindingDraftUiState(horseId = 6, horseName = "马儿A")
         )
         composeRule.setContent {
@@ -415,6 +459,8 @@ class BattleScoreFlowUiTest {
                 PlayerCardUiModel(
                     id = 1,
                     name = "A",
+                    avatarKey = "player_1",
+                    avatarEmoji = "P1",
                     roundDelta = "+0",
                     totalScore = "100",
                     isDealer = true,
@@ -424,6 +470,8 @@ class BattleScoreFlowUiTest {
                 PlayerCardUiModel(
                     id = 2,
                     name = "B",
+                    avatarKey = "player_2",
+                    avatarEmoji = "P2",
                     roundDelta = "+0",
                     totalScore = "100",
                     isDealer = false,
@@ -433,6 +481,8 @@ class BattleScoreFlowUiTest {
                 PlayerCardUiModel(
                     id = 3,
                     name = "C",
+                    avatarKey = "player_3",
+                    avatarEmoji = "P3",
                     roundDelta = "+0",
                     totalScore = "100",
                     isDealer = false,
@@ -442,6 +492,8 @@ class BattleScoreFlowUiTest {
                 PlayerCardUiModel(
                     id = 4,
                     name = "D",
+                    avatarKey = "player_4",
+                    avatarEmoji = "P4",
                     roundDelta = "+0",
                     totalScore = "100",
                     isDealer = false,

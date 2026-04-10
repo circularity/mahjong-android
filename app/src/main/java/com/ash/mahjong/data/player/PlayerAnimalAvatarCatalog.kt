@@ -4,20 +4,35 @@ import kotlin.random.Random
 
 object PlayerAnimalAvatarCatalog {
 
-    private data class AnimalAvatar(
+    private enum class AvatarType {
+        ANIMAL,
+        IMAGE
+    }
+
+    private data class PlayerAvatar(
         val key: String,
-        val emoji: String
+        val emoji: String?,
+        val type: AvatarType
     )
 
     private val avatars = listOf(
-        AnimalAvatar(key = "cat", emoji = "🐱"),
-        AnimalAvatar(key = "dog", emoji = "🐶"),
-        AnimalAvatar(key = "rabbit", emoji = "🐰"),
-        AnimalAvatar(key = "fox", emoji = "🦊"),
-        AnimalAvatar(key = "panda", emoji = "🐼"),
-        AnimalAvatar(key = "koala", emoji = "🐨"),
-        AnimalAvatar(key = "frog", emoji = "🐸"),
-        AnimalAvatar(key = "penguin", emoji = "🐧")
+        PlayerAvatar(key = "cat", emoji = "🐱", type = AvatarType.ANIMAL),
+        PlayerAvatar(key = "dog", emoji = "🐶", type = AvatarType.ANIMAL),
+        PlayerAvatar(key = "rabbit", emoji = "🐰", type = AvatarType.ANIMAL),
+        PlayerAvatar(key = "fox", emoji = "🦊", type = AvatarType.ANIMAL),
+        PlayerAvatar(key = "panda", emoji = "🐼", type = AvatarType.ANIMAL),
+        PlayerAvatar(key = "koala", emoji = "🐨", type = AvatarType.ANIMAL),
+        PlayerAvatar(key = "frog", emoji = "🐸", type = AvatarType.ANIMAL),
+        PlayerAvatar(key = "penguin", emoji = "🐧", type = AvatarType.ANIMAL),
+        PlayerAvatar(key = "image_01", emoji = null, type = AvatarType.IMAGE),
+        PlayerAvatar(key = "image_02", emoji = null, type = AvatarType.IMAGE),
+        PlayerAvatar(key = "image_03", emoji = null, type = AvatarType.IMAGE),
+        PlayerAvatar(key = "image_04", emoji = null, type = AvatarType.IMAGE),
+        PlayerAvatar(key = "image_05", emoji = null, type = AvatarType.IMAGE),
+        PlayerAvatar(key = "image_06", emoji = null, type = AvatarType.IMAGE),
+        PlayerAvatar(key = "image_07", emoji = null, type = AvatarType.IMAGE),
+        PlayerAvatar(key = "image_08", emoji = null, type = AvatarType.IMAGE),
+        PlayerAvatar(key = "image_09", emoji = null, type = AvatarType.IMAGE)
     )
     private val avatarByKey = avatars.associateBy { it.key }
 
@@ -45,8 +60,15 @@ object PlayerAnimalAvatarCatalog {
         return avatars[(currentIndex + 1) % avatars.size].key
     }
 
+    fun isImageAvatarKey(avatarKey: String): Boolean {
+        return avatarByKey[avatarKey]?.type == AvatarType.IMAGE
+    }
+
     fun emojiForKey(avatarKey: String): String {
-        return avatarByKey[avatarKey]?.emoji ?: avatars.first().emoji
+        if (isImageAvatarKey(avatarKey)) {
+            return ""
+        }
+        return avatarByKey[avatarKey]?.emoji ?: avatars.first().emoji.orEmpty()
     }
 
     private fun fallbackAvatarKey(playerId: Int, createdAt: Long): String {

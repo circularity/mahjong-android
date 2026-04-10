@@ -19,3 +19,9 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Keep enum names that are persisted in DB / queried by SQL literals.
+# These enum constants are used as stable string protocol values.
+-keepclassmembers enum com.ash.mahjong.data.player.PlayerRole { *; }
+-keepclassmembers enum com.ash.mahjong.data.battle.PersistedBattleEventType { *; }
+-keepclassmembers enum com.ash.mahjong.feature.battle_score.state.PlayerStatus { *; }

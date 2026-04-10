@@ -13,6 +13,7 @@ import com.ash.mahjong.feature.battle_score.state.PlayerStatus
 import com.ash.mahjong.feature.battle_score.state.ResetAllConfirmStep
 import com.ash.mahjong.feature.battle_score.state.SettlementPromptType
 import com.ash.mahjong.test.fake.FakeGameSettingsRepository
+import com.ash.mahjong.test.fake.FakeBattleRecordRepository
 import com.ash.mahjong.test.fake.FakePlayerRepository
 import com.ash.mahjong.test.rules.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -1014,6 +1015,51 @@ class BattleScoreViewModelTest {
         advanceUntilIdle()
 
         assertEquals(8, viewModel.uiState.value.eventDraft?.multiplier)
+    }
+
+    @Test
+    fun roundEvents_areNotPersistedBeforeSettlementConfirmation() = runTest {
+        val battleRecordRepository = FakeBattleRecordRepository()
+        val viewModel = BattleScoreViewModel(
+            playerRepository = FakePlayerRepository(initialPlayers = fourPlayers()),
+            gameSettingsRepository = FakeGameSettingsRepository(),
+            battleRecordRepository = battleRecordRepository
+        )
+        advanceUntilIdle()
+
+        hu(viewModel, actorId = 1, targetId = 2)
+        advanceUntilIdle()
+
+        assertTrue(battleRecordRepository.persistedRounds.isEmpty())
+    }
+
+    @Test
+    fun confirmSettleAndNextRound_persistsCurrentRoundAsBatch() = runTest {
+        val battleRecordRepository = FakeBattleRecordRepository()
+        val viewModel = BattleScoreViewModel(
+            playerRepository = FakePlayerRepository(initialPlayers = fourPlayers()),
+            gameSettingsRepository = FakeGameSettingsRepository(),
+            battleRecordRepository = battleRecordRepository
+        )
+        advanceUntilIdle()
+
+        hu(viewModel, actorId = 1, targetId = 2)
+        hu(viewModel, actorId = 3, targetId = 4)
+        hu(viewModel, actorId = 2, targetId = 4)
+        advanceUntilIdle()
+
+        viewModel.onIntent(BattleScoreIntent.ConfirmSettleAndNextRound)
+        advanceUntilIdle()
+
+        assertEquals(1, battleRecordRepository.persistedRounds.size)
+        val persistedRound = battleRecordRepository.persistedRounds.single()
+        assertEquals(1, persistedRound.roundNo)
+        assertTrue(persistedRound.events.isNotEmpty())
+        assertTrue(
+            persistedRound.events.any { event ->
+                event.eventType.name == "HU"
+            }
+        )
     }
 
     private fun hu(viewModel: BattleScoreViewModel, actorId: Int, targetId: Int) {

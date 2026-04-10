@@ -89,7 +89,7 @@ fun BattleTopBar(
                         onClick = onSwapPlayersClick
                     )
                     TopBarOutlinedActionButton(
-                        iconRes = R.drawable.settings,
+                        iconRes = R.drawable.reset,
                         text = stringResource(R.string.battle_reset_action),
                         enabled = canReset,
                         onClick = onResetClick

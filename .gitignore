@@ -18,3 +18,5 @@
 .cxx
 local.properties
 /.idea/AndroidProjectSystem.xml
+/keystore.properties
+/signing/

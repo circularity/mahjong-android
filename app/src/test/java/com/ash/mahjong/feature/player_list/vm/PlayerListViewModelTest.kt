@@ -7,6 +7,7 @@ import org.junit.Rule
 import org.junit.Test
 import com.ash.mahjong.R
 import com.ash.mahjong.data.player.PlayerRole
+import com.ash.mahjong.data.player.PlayerAnimalAvatarCatalog
 import com.ash.mahjong.test.fake.FakePlayerRepository
 import com.ash.mahjong.test.rules.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -166,16 +167,14 @@ class PlayerListViewModelTest {
 
         val player = viewModel.uiState.value.players.first()
         val oldAvatarKey = player.avatarKey
-        val oldAvatarEmoji = player.avatarEmoji
 
         viewModel.onChangePlayerAvatarClick(player.id)
         advanceUntilIdle()
 
         val updatedPlayer = viewModel.uiState.value.players.first()
-        assertTrue(updatedPlayer.avatarKey.isNotBlank())
-        assertTrue(updatedPlayer.avatarEmoji.isNotBlank())
+        assertTrue(PlayerAnimalAvatarCatalog.normalizeAvatarKey(updatedPlayer.avatarKey) != null)
         assertTrue(
-            updatedPlayer.avatarKey != oldAvatarKey || updatedPlayer.avatarEmoji != oldAvatarEmoji
+            updatedPlayer.avatarKey != oldAvatarKey
         )
     }
 }

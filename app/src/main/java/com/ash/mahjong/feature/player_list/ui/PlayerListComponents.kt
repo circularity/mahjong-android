@@ -26,12 +26,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ash.mahjong.R
 import com.ash.mahjong.data.player.PlayerRole
 import com.ash.mahjong.feature.player_list.state.PlayerListItemUiModel
 import com.ash.mahjong.feature.player_list.state.PlayerTrend
+import com.ash.mahjong.ui.avatar.PlayerAvatarVisual
 import java.text.NumberFormat
 
 @Composable
@@ -118,7 +120,9 @@ internal fun PlayerListCard(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Avatar(
+                avatarKey = player.avatarKey,
                 avatarEmoji = player.avatarEmoji,
+                fallbackText = player.name.take(1),
                 isOnline = player.isOnline,
                 trend = player.trend,
                 onClick = onAvatarClick
@@ -243,7 +247,9 @@ private fun PlayerStatusTag(isActive: Boolean) {
 
 @Composable
 private fun Avatar(
+    avatarKey: String,
     avatarEmoji: String,
+    fallbackText: String,
     isOnline: Boolean,
     trend: PlayerTrend,
     onClick: () -> Unit
@@ -273,11 +279,15 @@ private fun Avatar(
                 },
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = avatarEmoji,
-                color = PlayerListColors.OnSurface,
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 28.sp
+            PlayerAvatarVisual(
+                avatarKey = avatarKey,
+                avatarEmoji = avatarEmoji,
+                fallbackText = fallbackText,
+                textColor = PlayerListColors.OnSurface,
+                textStyle = TextStyle(
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 28.sp
+                )
             )
         }
         if (isOnline) {

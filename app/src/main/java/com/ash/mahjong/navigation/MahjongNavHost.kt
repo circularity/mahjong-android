@@ -2,14 +2,24 @@ package com.ash.mahjong.navigation
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Group as FilledGroup
+import androidx.compose.material.icons.filled.Leaderboard as FilledLeaderboard
+import androidx.compose.material.icons.filled.Settings as FilledSettings
+import androidx.compose.material.icons.filled.Style as FilledStyle
+import androidx.compose.material.icons.outlined.Group as OutlinedGroup
+import androidx.compose.material.icons.outlined.Leaderboard as OutlinedLeaderboard
+import androidx.compose.material.icons.outlined.Settings as OutlinedSettings
+import androidx.compose.material.icons.outlined.Style as OutlinedStyle
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.navigation3.runtime.NavKey
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
@@ -19,7 +29,7 @@ import com.ash.mahjong.feature.battle_score.ui.BattleScoreTestTags
 import com.ash.mahjong.feature.battle_score.ui.components.BattleBottomBar
 import com.ash.mahjong.feature.player_list.ui.PlayerListRoute
 import com.ash.mahjong.feature.settings.ui.SettingsRoute
-import androidx.compose.material3.Scaffold
+import com.ash.mahjong.feature.stats.ui.StatsRoute
 
 @Composable
 fun MahjongNavHost() {
@@ -54,10 +64,7 @@ fun MahjongNavHost() {
                             )
                         }
                         AppRoute.Stats -> NavEntry(key) {
-                            TopLevelPlaceholderScreen(
-                                titleRes = R.string.battle_nav_stats,
-                                descriptionRes = R.string.placeholder_stats_description
-                            )
+                            StatsRoute()
                         }
                         AppRoute.Players -> NavEntry(key) { PlayerListRoute() }
                         AppRoute.Settings -> NavEntry(key) {
@@ -86,22 +93,26 @@ private fun buildTopLevelTabs(currentRoute: AppRoute): List<TopLevelTabUiModel> 
     return listOf(
         TopLevelTabUiModel(
             labelRes = R.string.battle_nav_match,
-            iconRes = R.drawable.match,
+            selectedIcon = Icons.Filled.FilledStyle,
+            unselectedIcon = Icons.Outlined.OutlinedStyle,
             selected = currentRoute == AppRoute.BattleScore
         ),
         TopLevelTabUiModel(
             labelRes = R.string.battle_nav_stats,
-            iconRes = R.drawable.stats,
+            selectedIcon = Icons.Filled.FilledLeaderboard,
+            unselectedIcon = Icons.Outlined.OutlinedLeaderboard,
             selected = currentRoute == AppRoute.Stats
         ),
         TopLevelTabUiModel(
             labelRes = R.string.battle_nav_rules,
-            iconRes = R.drawable.players,
+            selectedIcon = Icons.Filled.FilledGroup,
+            unselectedIcon = Icons.Outlined.OutlinedGroup,
             selected = currentRoute == AppRoute.Players
         ),
         TopLevelTabUiModel(
             labelRes = R.string.battle_nav_settings,
-            iconRes = R.drawable.settings,
+            selectedIcon = Icons.Filled.FilledSettings,
+            unselectedIcon = Icons.Outlined.OutlinedSettings,
             selected = currentRoute == AppRoute.Settings
         )
     )

@@ -2,6 +2,10 @@ package com.ash.mahjong.di
 
 import android.content.Context
 import androidx.room.Room
+import com.ash.mahjong.data.battle.BattleRecordRepository
+import com.ash.mahjong.data.battle.RoomBattleRecordRepository
+import com.ash.mahjong.data.battle.local.BattleEventDao
+import com.ash.mahjong.data.battle.local.BattleSessionDao
 import com.ash.mahjong.data.player.PlayerRepository
 import com.ash.mahjong.data.player.RoomPlayerRepository
 import com.ash.mahjong.data.player.local.MahjongDatabase
@@ -31,7 +35,8 @@ object PlayerDataModule {
             .addMigrations(
                 PlayerMigrations.MIGRATION_1_2,
                 PlayerMigrations.MIGRATION_2_3,
-                PlayerMigrations.MIGRATION_3_4
+                PlayerMigrations.MIGRATION_3_4,
+                PlayerMigrations.MIGRATION_4_5
             )
             .build()
     }
@@ -42,8 +47,32 @@ object PlayerDataModule {
     }
 
     @Provides
+    fun provideBattleSessionDao(database: MahjongDatabase): BattleSessionDao {
+        return database.battleSessionDao()
+    }
+
+    @Provides
+    fun provideBattleEventDao(database: MahjongDatabase): BattleEventDao {
+        return database.battleEventDao()
+    }
+
+    @Provides
     @Singleton
     fun providePlayerRepository(playerDao: PlayerDao): PlayerRepository {
         return RoomPlayerRepository(playerDao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideBattleRecordRepository(
+        database: MahjongDatabase,
+        battleSessionDao: BattleSessionDao,
+        battleEventDao: BattleEventDao
+    ): BattleRecordRepository {
+        return RoomBattleRecordRepository(
+            database = database,
+            battleSessionDao = battleSessionDao,
+            battleEventDao = battleEventDao
+        )
     }
 }

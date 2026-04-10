@@ -37,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ash.mahjong.R
+import com.ash.mahjong.ui.avatar.PlayerAvatarVisual
 
 @Composable
 internal fun SwapSection(
@@ -87,7 +88,9 @@ internal fun <T> SwapCardsGrid(
 internal fun SwapItemCard(
     title: String,
     subtitle: String,
-    avatarText: String,
+    avatarKey: String,
+    avatarEmoji: String,
+    avatarFallbackText: String,
     rankLabel: String?,
     isMuted: Boolean,
     isDragging: Boolean,
@@ -171,10 +174,12 @@ internal fun SwapItemCard(
                         .semantics { contentDescription = avatarContentDescription },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = avatarText,
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.surface
+                    PlayerAvatarVisual(
+                        avatarKey = avatarKey,
+                        avatarEmoji = avatarEmoji,
+                        fallbackText = avatarFallbackText,
+                        textStyle = MaterialTheme.typography.labelLarge,
+                        textColor = MaterialTheme.colorScheme.surface
                     )
                 }
 

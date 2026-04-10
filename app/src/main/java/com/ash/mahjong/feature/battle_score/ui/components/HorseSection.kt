@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.ash.mahjong.R
 import com.ash.mahjong.feature.battle_score.state.HorseUiModel
 import com.ash.mahjong.feature.battle_score.ui.BattleScoreTestTags
+import com.ash.mahjong.ui.avatar.PlayerAvatarVisual
 import com.ash.mahjong.ui.theme.MahjongDesign
 
 @Composable
@@ -110,9 +111,11 @@ private fun HorseCard(
                         .semantics { contentDescription = avatarContentDescription },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = horse.avatarEmoji.ifBlank { horse.name.take(1) },
-                        style = MaterialTheme.typography.labelMedium
+                    PlayerAvatarVisual(
+                        avatarKey = horse.avatarKey,
+                        avatarEmoji = horse.avatarEmoji,
+                        fallbackText = horse.name.take(1),
+                        textStyle = MaterialTheme.typography.labelMedium
                     )
                 }
             }

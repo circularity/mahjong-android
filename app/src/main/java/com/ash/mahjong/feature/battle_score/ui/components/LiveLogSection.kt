@@ -10,14 +10,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import com.ash.mahjong.R
 import com.ash.mahjong.feature.battle_score.state.LiveLogActionType
 import com.ash.mahjong.feature.battle_score.state.LiveLogHighlight
@@ -51,7 +54,17 @@ fun LiveLogSection(
                 )
             }
             TextButton(onClick = onUndoClick, enabled = canUndo) {
-                Text(text = stringResource(R.string.battle_action_undo))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(spacing.xxs),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.reset),
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Text(text = stringResource(R.string.battle_action_undo))
+                }
             }
         }
 
