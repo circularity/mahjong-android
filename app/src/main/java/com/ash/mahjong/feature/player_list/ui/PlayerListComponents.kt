@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -133,31 +135,38 @@ internal fun PlayerListCard(
                 .fillMaxWidth()
                 .alpha(cardAlpha)
                 .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Avatar(
-                avatarKey = player.avatarKey,
-                avatarEmoji = player.avatarEmoji,
-                fallbackText = player.name.take(1),
-                isOnline = player.isOnline,
-                trend = player.trend,
-                onClick = onAvatarClick
-            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Avatar(
+                    avatarKey = player.avatarKey,
+                    avatarEmoji = player.avatarEmoji,
+                    fallbackText = player.name.take(1),
+                    isOnline = player.isOnline,
+                    trend = player.trend,
+                    onClick = onAvatarClick
+                )
+                Text(
+                    text = player.name,
+                    color = PlayerListColors.OnSurface,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp
+                )
+            }
+
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = player.name,
-                        color = PlayerListColors.OnSurface,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
                     if (player.isMvp) {
                         Surface(
                             shape = RoundedCornerShape(10.dp),
@@ -214,7 +223,9 @@ internal fun PlayerListCard(
                     )
                 }
             }
+
             Column(
+                modifier = Modifier.align(Alignment.Bottom),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalAlignment = Alignment.End
             ) {
@@ -224,7 +235,11 @@ internal fun PlayerListCard(
                     } else {
                         stringResource(R.string.players_status_inactive)
                     },
-                    icon = if (player.isActive) Icons.Outlined.PauseCircle else Icons.Outlined.PlayCircle,
+                    icon = if (player.isActive) {
+                        Icons.Outlined.PauseCircle
+                    } else {
+                        Icons.Outlined.PlayCircle
+                    },
                     containerColor = if (player.isActive) {
                         Color(0xFFDBF0D5)
                     } else {
@@ -284,7 +299,9 @@ private fun PlayerStatusTag(isActive: Boolean) {
             color = contentColor,
             fontSize = 9.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+            maxLines = 1,
+            softWrap = false
         )
     }
 }
@@ -370,7 +387,9 @@ private fun PlayerRoleTag(role: PlayerRole) {
             color = contentColor,
             fontSize = 9.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+            maxLines = 1,
+            softWrap = false
         )
     }
 }

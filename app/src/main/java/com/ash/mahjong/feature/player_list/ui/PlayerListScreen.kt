@@ -1,5 +1,11 @@
 package com.ash.mahjong.feature.player_list.ui
 
+import android.content.Context
+import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,16 +18,30 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import com.ash.mahjong.R
 import com.ash.mahjong.feature.player_list.state.PlayerListUiState
+import com.ash.mahjong.ui.avatar.PlayerAvatarImageStorage
+import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun PlayerListScreen(
@@ -39,6 +59,57 @@ fun PlayerListScreen(
     onPlayerLongClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    var showAvatarSourceDialog by remember { mutableStateOf(false) }
+    var pendingCameraUri by remember { mutableStateOf<Uri?>(null) }
+    var pendingCameraFile by remember { mutableStateOf<File?>(null) }
+
+    val saveAvatarToLocalStorage: (Uri, (() -> Unit)?) -> Unit = { sourceUri, onComplete ->
+        coroutineScope.launch {
+            val avatarKey = withContext(Dispatchers.IO) {
+                PlayerAvatarImageStorage.saveCompressedAvatar(
+                    context = context,
+                    sourceUri = sourceUri
+                )
+            }
+            if (avatarKey == null) {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.players_avatar_pick_failed),
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                onSelectDialogAvatar(avatarKey)
+            }
+            onComplete?.invoke()
+        }
+    }
+
+    val pickPhotoLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            saveAvatarToLocalStorage(uri, null)
+        }
+    }
+
+    val takePhotoLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        val capturedUri = pendingCameraUri
+        val capturedFile = pendingCameraFile
+        pendingCameraUri = null
+        pendingCameraFile = null
+        if (success && capturedUri != null) {
+            saveAvatarToLocalStorage(capturedUri) {
+                capturedFile?.delete()
+            }
+        } else {
+            capturedFile?.delete()
+        }
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -150,7 +221,37 @@ fun PlayerListScreen(
                 onDecreaseInitialScore = onDecreaseInitialScore,
                 onIncreaseInitialScore = onIncreaseInitialScore,
                 onSelectAvatar = onSelectDialogAvatar,
+                onSelectPhotoAvatarClick = {
+                    showAvatarSourceDialog = true
+                },
                 onConfirmAddPlayer = onConfirmAddPlayer
+            )
+        }
+
+        if (showAvatarSourceDialog) {
+            AvatarSourceDialog(
+                onDismissRequest = { showAvatarSourceDialog = false },
+                onPickFromGallery = {
+                    showAvatarSourceDialog = false
+                    pickPhotoLauncher.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    )
+                },
+                onTakePhoto = {
+                    showAvatarSourceDialog = false
+                    val output = createCameraOutput(context)
+                    if (output == null) {
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.players_avatar_pick_failed),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        pendingCameraUri = output.uri
+                        pendingCameraFile = output.file
+                        takePhotoLauncher.launch(output.uri)
+                    }
+                }
             )
         }
     }
@@ -179,5 +280,55 @@ private fun EmptyPlayersState() {
         color = PlayerListColors.OnSurfaceVariant,
         fontWeight = FontWeight.SemiBold,
         fontSize = 13.sp
+    )
+}
+
+@Composable
+private fun AvatarSourceDialog(
+    onDismissRequest: () -> Unit,
+    onPickFromGallery: () -> Unit,
+    onTakePhoto: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = {
+            Text(text = stringResource(R.string.players_avatar_source_dialog_title))
+        },
+        text = {
+            Text(text = stringResource(R.string.players_avatar_content_description))
+        },
+        confirmButton = {
+            TextButton(onClick = onPickFromGallery) {
+                Text(text = stringResource(R.string.players_avatar_source_gallery))
+            }
+        },
+        dismissButton = {
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                TextButton(onClick = onTakePhoto) {
+                    Text(text = stringResource(R.string.players_avatar_source_camera))
+                }
+                TextButton(onClick = onDismissRequest) {
+                    Text(text = stringResource(R.string.players_avatar_source_cancel))
+                }
+            }
+        }
+    )
+}
+
+private data class CameraOutput(
+    val file: File,
+    val uri: Uri
+)
+
+private fun createCameraOutput(context: Context): CameraOutput? {
+    val tempDir = File(context.cacheDir, "player_avatar_capture").apply { mkdirs() }
+    val tempFile = File(tempDir, "capture_${System.currentTimeMillis()}.jpg")
+    val fileProviderAuthority = "${context.packageName}.fileprovider"
+    val contentUri = runCatching {
+        FileProvider.getUriForFile(context, fileProviderAuthority, tempFile)
+    }.getOrNull() ?: return null
+    return CameraOutput(
+        file = tempFile,
+        uri = contentUri
     )
 }

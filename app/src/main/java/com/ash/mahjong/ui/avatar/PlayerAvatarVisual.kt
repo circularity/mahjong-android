@@ -1,13 +1,19 @@
 package com.ash.mahjong.ui.avatar
 
+import android.graphics.BitmapFactory
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -41,15 +47,33 @@ fun PlayerAvatarVisual(
     textStyle: TextStyle = MaterialTheme.typography.titleMedium,
     textColor: Color = MaterialTheme.colorScheme.onSurface
 ) {
+    val context = LocalContext.current
     val imageRes = if (PlayerAnimalAvatarCatalog.isImageAvatarKey(avatarKey)) {
         avatarImageResOrNull(avatarKey)
     } else {
         null
     }
+    val localAvatarBitmap = remember(context, avatarKey) {
+        if (!PlayerAnimalAvatarCatalog.isLocalAvatarKey(avatarKey)) {
+            null
+        } else {
+            val file = PlayerAvatarImageStorage.resolveLocalAvatarFile(context, avatarKey)
+            file?.let { avatarFile ->
+                BitmapFactory.decodeFile(avatarFile.absolutePath)?.asImageBitmap()
+            }
+        }
+    }
 
     if (imageRes != null) {
         Image(
             painter = painterResource(id = imageRes),
+            contentDescription = contentDescription,
+            modifier = modifier,
+            contentScale = ContentScale.Crop
+        )
+    } else if (localAvatarBitmap != null) {
+        Image(
+            bitmap = localAvatarBitmap,
             contentDescription = contentDescription,
             modifier = modifier,
             contentScale = ContentScale.Crop
@@ -60,12 +84,16 @@ fun PlayerAvatarVisual(
         } else {
             modifier.semantics { this.contentDescription = contentDescription }
         }
-        Text(
-            text = avatarEmoji.ifBlank { fallbackText },
-            style = textStyle,
-            color = textColor,
-            textAlign = TextAlign.Center,
-            modifier = textModifier
-        )
+        Box(
+            modifier = textModifier,
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = avatarEmoji.ifBlank { fallbackText },
+                style = textStyle,
+                color = textColor,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }

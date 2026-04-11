@@ -12,7 +12,12 @@ class PlayerAnimalAvatarCatalogTest {
     fun normalizeAvatarKey_acceptsAnimalAndImageKeys() {
         assertEquals("cat", PlayerAnimalAvatarCatalog.normalizeAvatarKey("cat"))
         assertEquals("image_01", PlayerAnimalAvatarCatalog.normalizeAvatarKey("image_01"))
+        assertEquals(
+            "local_avatar:avatar_001.jpg",
+            PlayerAnimalAvatarCatalog.normalizeAvatarKey("local_avatar:avatar_001.jpg")
+        )
         assertNull(PlayerAnimalAvatarCatalog.normalizeAvatarKey("unknown_avatar"))
+        assertNull(PlayerAnimalAvatarCatalog.normalizeAvatarKey("local_avatar:../avatar.jpg"))
     }
 
     @Test
@@ -34,5 +39,14 @@ class PlayerAnimalAvatarCatalogTest {
     fun isImageAvatarKey_detectsImagePool() {
         assertTrue(PlayerAnimalAvatarCatalog.isImageAvatarKey("image_05"))
         assertTrue(!PlayerAnimalAvatarCatalog.isImageAvatarKey("dog"))
+    }
+
+    @Test
+    fun localAvatarKey_resolvesFileNameAndImageState() {
+        val avatarKey = PlayerAnimalAvatarCatalog.localAvatarKey("photo_002.jpg")
+        assertEquals("photo_002.jpg", PlayerAnimalAvatarCatalog.localAvatarFileNameOrNull(avatarKey))
+        assertTrue(PlayerAnimalAvatarCatalog.isLocalAvatarKey(avatarKey))
+        assertTrue(PlayerAnimalAvatarCatalog.isVisualImageAvatarKey(avatarKey))
+        assertEquals("", PlayerAnimalAvatarCatalog.emojiForKey(avatarKey))
     }
 }

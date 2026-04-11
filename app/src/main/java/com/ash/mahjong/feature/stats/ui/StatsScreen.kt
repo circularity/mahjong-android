@@ -81,8 +81,8 @@ fun StatsScreen(
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
-                start = spacing.xl,
-                end = spacing.xl,
+                start = spacing.md,
+                end = spacing.md,
                 top = spacing.lg,
                 bottom = spacing.xxxl
             ),
@@ -387,7 +387,7 @@ private fun QuickMetricTile(
     Surface(
         modifier = modifier,
         color = containerColor,
-        shape = RoundedCornerShape(30.dp)
+        shape = RoundedCornerShape(26.dp)
     ) {
         Column(
             modifier = Modifier

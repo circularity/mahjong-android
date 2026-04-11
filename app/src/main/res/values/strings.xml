@@ -180,6 +180,12 @@
     <string name="players_dialog_error_empty_name">Please enter player name.</string>
     <string name="players_dialog_error_duplicate_name">Player name already exists.</string>
     <string name="players_avatar_content_description">Tap to change avatar</string>
+    <string name="players_dialog_avatar_pick_photo">Choose avatar photo</string>
+    <string name="players_avatar_source_dialog_title">Choose Avatar Source</string>
+    <string name="players_avatar_source_gallery">Photo Library</string>
+    <string name="players_avatar_source_camera">Take Photo</string>
+    <string name="players_avatar_source_cancel">Cancel</string>
+    <string name="players_avatar_pick_failed">Unable to update avatar photo.</string>
 
     <string name="players_nav_history">History</string>
     <string name="players_nav_players">Players</string>

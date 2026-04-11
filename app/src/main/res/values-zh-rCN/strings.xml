@@ -180,6 +180,12 @@
     <string name="players_dialog_error_empty_name">请输入玩家姓名。</string>
     <string name="players_dialog_error_duplicate_name">玩家姓名已存在。</string>
     <string name="players_avatar_content_description">点击切换头像</string>
+    <string name="players_dialog_avatar_pick_photo">选择头像照片</string>
+    <string name="players_avatar_source_dialog_title">选择头像来源</string>
+    <string name="players_avatar_source_gallery">相册选图</string>
+    <string name="players_avatar_source_camera">拍照</string>
+    <string name="players_avatar_source_cancel">取消</string>
+    <string name="players_avatar_pick_failed">头像更新失败，请重试。</string>
 
     <string name="players_nav_history">历史</string>
     <string name="players_nav_players">玩家</string>

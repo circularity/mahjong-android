@@ -3,6 +3,7 @@ package com.ash.mahjong.data.player
 import kotlin.random.Random
 
 object PlayerAnimalAvatarCatalog {
+    private const val LOCAL_AVATAR_PREFIX = "local_avatar:"
 
     private enum class AvatarType {
         ANIMAL,
@@ -45,7 +46,14 @@ object PlayerAnimalAvatarCatalog {
     }
 
     fun normalizeAvatarKey(avatarKey: String?): String? {
-        return avatarKey?.takeIf { key -> avatarByKey.containsKey(key) }
+        if (avatarKey == null) {
+            return null
+        }
+        if (avatarByKey.containsKey(avatarKey)) {
+            return avatarKey
+        }
+        val localAvatarName = localAvatarFileNameOrNull(avatarKey)
+        return avatarKey.takeIf { localAvatarName != null }
     }
 
     fun resolveAvatarKeyOrFallback(
@@ -68,8 +76,36 @@ object PlayerAnimalAvatarCatalog {
         return avatarByKey[avatarKey]?.type == AvatarType.IMAGE
     }
 
+    fun isLocalAvatarKey(avatarKey: String?): Boolean {
+        return localAvatarFileNameOrNull(avatarKey) != null
+    }
+
+    fun isVisualImageAvatarKey(avatarKey: String?): Boolean {
+        return (avatarKey != null && isImageAvatarKey(avatarKey)) || isLocalAvatarKey(avatarKey)
+    }
+
+    fun localAvatarKey(fileName: String): String {
+        return "$LOCAL_AVATAR_PREFIX$fileName"
+    }
+
+    fun localAvatarFileNameOrNull(avatarKey: String?): String? {
+        val normalized = avatarKey ?: return null
+        if (!normalized.startsWith(LOCAL_AVATAR_PREFIX)) {
+            return null
+        }
+        val fileName = normalized.removePrefix(LOCAL_AVATAR_PREFIX).trim()
+        if (fileName.isBlank()) {
+            return null
+        }
+        // Prevent traversing outside the app avatar directory.
+        if (fileName.contains('/') || fileName.contains('\\')) {
+            return null
+        }
+        return fileName
+    }
+
     fun emojiForKey(avatarKey: String): String {
-        if (isImageAvatarKey(avatarKey)) {
+        if (isVisualImageAvatarKey(avatarKey)) {
             return ""
         }
         return avatarByKey[avatarKey]?.emoji ?: avatars.first().emoji.orEmpty()

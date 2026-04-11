@@ -14,10 +14,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -48,6 +51,7 @@ internal fun AddPlayerDialog(
     onDecreaseInitialScore: () -> Unit,
     onIncreaseInitialScore: () -> Unit,
     onSelectAvatar: (String) -> Unit,
+    onSelectPhotoAvatarClick: () -> Unit,
     onConfirmAddPlayer: () -> Unit
 ) {
     val dialogTitleRes = if (dialogState.mode == PlayerDialogMode.EDIT) {
@@ -64,7 +68,9 @@ internal fun AddPlayerDialog(
     val selectedAvatarFallback = dialogState.playerName.trim().take(1).ifBlank {
         stringResource(R.string.settings_profile_placeholder)
     }
-    val selectedAvatarIsImage = PlayerAnimalAvatarCatalog.isImageAvatarKey(dialogState.selectedAvatarKey)
+    val selectedAvatarIsImage = PlayerAnimalAvatarCatalog.isVisualImageAvatarKey(
+        dialogState.selectedAvatarKey
+    )
     Dialog(onDismissRequest = onDismissRequest) {
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -100,21 +106,28 @@ internal fun AddPlayerDialog(
                             contentDescription = avatarContentDescription,
                             textStyle = androidx.compose.material3.MaterialTheme.typography.headlineMedium,
                             textColor = Color.White,
-                            modifier = Modifier.size(72.dp)
+                            modifier = if (selectedAvatarIsImage) {
+                                Modifier.fillMaxSize()
+                            } else {
+                                Modifier.size(72.dp)
+                            }
                         )
                     }
                     Box(
                         modifier = Modifier
                             .size(28.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFFBCEFAE)),
+                            .background(Color(0xFFBCEFAE))
+                            .clickable(onClick = onSelectPhotoAvatarClick),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = stringResource(R.string.players_icon_edit),
-                            color = PlayerListColors.Primary,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
+                        Icon(
+                            imageVector = Icons.Outlined.PhotoCamera,
+                            contentDescription = stringResource(
+                                R.string.players_dialog_avatar_pick_photo
+                            ),
+                            tint = PlayerListColors.Primary,
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }
@@ -310,7 +323,7 @@ private fun AvatarChoiceItem(
     fallbackText: String,
     onClick: () -> Unit
 ) {
-    val isImageAvatar = PlayerAnimalAvatarCatalog.isImageAvatarKey(avatarKey)
+    val isImageAvatar = PlayerAnimalAvatarCatalog.isVisualImageAvatarKey(avatarKey)
     val backgroundColor = if (isImageAvatar) Color.Black else Color(0xFF15324A)
     val borderColor = if (selected) {
         Color(0xFFBCEFAE)
@@ -336,7 +349,7 @@ private fun AvatarChoiceItem(
                 contentDescription = avatarContentDescription,
                 textStyle = androidx.compose.material3.MaterialTheme.typography.titleMedium,
                 textColor = Color.White,
-                modifier = Modifier.size(34.dp)
+                modifier = Modifier.fillMaxSize()
             )
         } else {
             Text(
