@@ -1,6 +1,5 @@
 package com.ash.mahjong.feature.battle_score.ui.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,8 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -44,7 +41,7 @@ import com.ash.mahjong.feature.battle_score.state.PlayerCardUiModel
 import com.ash.mahjong.feature.battle_score.state.PlayerStatus
 import com.ash.mahjong.feature.battle_score.state.SettlementPromptType
 import com.ash.mahjong.feature.battle_score.state.SettlementPromptUiState
-import kotlin.math.abs
+import com.ash.mahjong.ui.avatar.PlayerAvatarVisual
 
 @Composable
 fun SettlementPromptDialog(
@@ -180,7 +177,6 @@ private fun SettlementList(
             val delta = entry.roundDelta.toDeltaValue()
             SettlementPlayerRow(
                 entry = entry,
-                avatarRes = settlementAvatarRes(entry.id),
                 isWinner = entry.entryKey == winnerEntryKey,
                 isCriticalLoss = delta < 0 && delta == lowestDelta
             )
@@ -191,10 +187,10 @@ private fun SettlementList(
 @Composable
 private fun SettlementPlayerRow(
     entry: SettlementEntryUiModel,
-    avatarRes: Int,
     isWinner: Boolean,
     isCriticalLoss: Boolean
 ) {
+    val avatarContentDescription = stringResource(R.string.player_avatar_content_desc)
     val statusLabelRes = entry.status?.let(::settlementStatusRes)
     val delta = entry.roundDelta
     val deltaColor = when {
@@ -223,14 +219,21 @@ private fun SettlementPlayerRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Box {
-                Image(
-                    painter = painterResource(id = avatarRes),
-                    contentDescription = stringResource(R.string.player_avatar_content_desc),
+                Box(
                     modifier = Modifier
                         .size(48.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center
+                ) {
+                    PlayerAvatarVisual(
+                        avatarKey = entry.avatarKey,
+                        avatarEmoji = entry.avatarEmoji,
+                        fallbackText = entry.name.take(1),
+                        contentDescription = avatarContentDescription,
+                        textStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                    )
+                }
                 if (isWinner) {
                     Box(
                         modifier = Modifier
@@ -372,9 +375,10 @@ private fun settlementStatusRes(status: PlayerStatus): Int? {
 }
 
 private data class SettlementEntryUiModel(
-    val id: Int,
     val entryKey: String,
     val name: String,
+    val avatarKey: String,
+    val avatarEmoji: String,
     val roundDelta: String,
     val totalScore: String,
     val status: PlayerStatus?,
@@ -388,9 +392,10 @@ private fun buildSettlementEntries(
 ): List<SettlementEntryUiModel> {
     val playerEntries = players.map { player ->
         SettlementEntryUiModel(
-            id = player.id,
             entryKey = "player_${player.id}",
             name = player.name,
+            avatarKey = player.avatarKey,
+            avatarEmoji = player.avatarEmoji,
             roundDelta = player.roundDelta,
             totalScore = player.totalScore,
             status = player.status,
@@ -400,9 +405,10 @@ private fun buildSettlementEntries(
     }
     val horseEntries = horses.map { horse ->
         SettlementEntryUiModel(
-            id = horse.id,
             entryKey = "horse_${horse.id}",
             name = horse.name,
+            avatarKey = horse.avatarKey,
+            avatarEmoji = horse.avatarEmoji,
             roundDelta = horse.roundDelta,
             totalScore = horse.totalScore,
             status = null,
@@ -416,13 +422,4 @@ private fun buildSettlementEntries(
 private fun String.toDeltaValue(): Int {
     val normalized = filter { it.isDigit() || it == '-' }
     return normalized.toIntOrNull() ?: 0
-}
-
-private fun settlementAvatarRes(seed: Int): Int {
-    return when (abs(seed) % 4) {
-        0 -> R.drawable.settlement_avatar_1
-        1 -> R.drawable.settlement_avatar_2
-        2 -> R.drawable.settlement_avatar_3
-        else -> R.drawable.settlement_avatar_4
-    }
 }

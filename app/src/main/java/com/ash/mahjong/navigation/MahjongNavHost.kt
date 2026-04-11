@@ -48,7 +48,9 @@ fun MahjongNavHost() {
             )
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
+        Box(
+            modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
+        ) {
             NavDisplay(
                 entryDecorators = listOf(
                     rememberSaveableStateHolderNavEntryDecorator(),

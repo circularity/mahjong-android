@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,16 +31,19 @@ fun PlayerListScreen(
     onPlayerNameChange: (String) -> Unit,
     onDecreaseInitialScore: () -> Unit,
     onIncreaseInitialScore: () -> Unit,
+    onSelectDialogAvatar: (String) -> Unit,
     onConfirmAddPlayer: () -> Unit,
     onTogglePlayerActiveClick: (Int) -> Unit,
     onTogglePlayerRoleClick: (Int) -> Unit,
     onChangePlayerAvatarClick: (Int) -> Unit,
+    onPlayerLongClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(PlayerListColors.Background)
+            .statusBarsPadding()
     ) {
         LazyColumn(
             modifier = Modifier
@@ -83,7 +87,8 @@ fun PlayerListScreen(
                                 player = player,
                                 onToggleActiveClick = { onTogglePlayerActiveClick(player.id) },
                                 onToggleRoleClick = { onTogglePlayerRoleClick(player.id) },
-                                onAvatarClick = { onChangePlayerAvatarClick(player.id) }
+                                onAvatarClick = { onChangePlayerAvatarClick(player.id) },
+                                onLongClick = { onPlayerLongClick(player.id) }
                             )
                         }
                     }
@@ -103,7 +108,8 @@ fun PlayerListScreen(
                                 player = player,
                                 onToggleActiveClick = { onTogglePlayerActiveClick(player.id) },
                                 onToggleRoleClick = { onTogglePlayerRoleClick(player.id) },
-                                onAvatarClick = { onChangePlayerAvatarClick(player.id) }
+                                onAvatarClick = { onChangePlayerAvatarClick(player.id) },
+                                onLongClick = { onPlayerLongClick(player.id) }
                             )
                         }
                     }
@@ -143,6 +149,7 @@ fun PlayerListScreen(
                 onPlayerNameChange = onPlayerNameChange,
                 onDecreaseInitialScore = onDecreaseInitialScore,
                 onIncreaseInitialScore = onIncreaseInitialScore,
+                onSelectAvatar = onSelectDialogAvatar,
                 onConfirmAddPlayer = onConfirmAddPlayer
             )
         }

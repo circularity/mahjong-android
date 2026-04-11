@@ -86,6 +86,22 @@ interface BattleEventDao {
         """
     )
     fun observeRecentRoundRows(): kotlinx.coroutines.flow.Flow<List<PlayerRecentRoundRow>>
+
+    @Query(
+        """
+        SELECT d.player_id AS playerId,
+               SUM(d.delta) AS monthlyDelta
+        FROM battle_event_delta d
+        INNER JOIN battle_event e ON e.id = d.event_id
+        WHERE e.created_at >= :monthStartInclusive
+          AND e.created_at < :nextMonthStartExclusive
+        GROUP BY d.player_id
+        """
+    )
+    fun observeMonthlyDeltaRows(
+        monthStartInclusive: Long,
+        nextMonthStartExclusive: Long
+    ): kotlinx.coroutines.flow.Flow<List<PlayerMonthlyDeltaRow>>
 }
 
 data class PlayerStatsRow(
@@ -108,4 +124,9 @@ data class PlayerRecentRoundRow(
     val roundNo: Int,
     val roundDelta: Int,
     val occurredAt: Long
+)
+
+data class PlayerMonthlyDeltaRow(
+    val playerId: Int,
+    val monthlyDelta: Int
 )

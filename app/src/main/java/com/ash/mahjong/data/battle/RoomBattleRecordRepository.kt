@@ -9,6 +9,8 @@ import com.ash.mahjong.data.battle.local.BattleSessionDao
 import com.ash.mahjong.data.battle.local.BattleSessionEntity
 import com.ash.mahjong.data.battle.local.BattleSessionPlayerEntity
 import com.ash.mahjong.data.player.local.MahjongDatabase
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -81,13 +83,23 @@ class RoomBattleRecordRepository @Inject constructor(
     }
 
     override fun observePlayerStats(): Flow<List<PlayerStats>> {
+        val (monthStartInclusive, nextMonthStartExclusive) = currentMonthRangeMillis()
         return combine(
             battleEventDao.observePlayerStatsRows(),
-            battleEventDao.observeRecentRoundRows()
-        ) { statsRows, recentRows ->
-            val recentByPlayer = recentRows
+            battleEventDao.observeRecentRoundRows(),
+            battleEventDao.observeMonthlyDeltaRows(
+                monthStartInclusive = monthStartInclusive,
+                nextMonthStartExclusive = nextMonthStartExclusive
+            )
+        ) { statsRows, recentRows, monthlyRows ->
+            val recentRowsByPlayer = recentRows
                 .groupBy { row -> row.playerId }
-                .mapValues { (_, rows) -> rows.take(5).map { row -> row.roundDelta } }
+                .mapValues { (_, rows) -> rows.sortedByDescending { row -> row.occurredAt } }
+            val recentByPlayer = recentRowsByPlayer
+                .mapValues { (_, rows) -> rows.take(10).map { row -> row.roundDelta } }
+            val lastBattleAtByPlayer = recentRowsByPlayer
+                .mapValues { (_, rows) -> rows.firstOrNull()?.occurredAt }
+            val monthlyDeltaByPlayer = monthlyRows.associate { row -> row.playerId to row.monthlyDelta }
 
             statsRows.map { row ->
                 val totalRounds = row.totalRounds
@@ -115,8 +127,10 @@ class RoomBattleRecordRepository @Inject constructor(
                     dianPaoRounds = row.dianPaoRounds,
                     winRate = (winRate * 10f).roundToInt() / 10f,
                     totalDelta = row.totalDelta,
+                    currentMonthDelta = monthlyDeltaByPlayer[row.playerId] ?: 0,
                     avgDelta = (avgDelta * 10f).roundToInt() / 10f,
-                    recentRounds = recentByPlayer[row.playerId].orEmpty()
+                    recentRounds = recentByPlayer[row.playerId].orEmpty(),
+                    lastBattleAt = lastBattleAtByPlayer[row.playerId]
                 )
             }
         }
@@ -179,5 +193,16 @@ class RoomBattleRecordRepository @Inject constructor(
     companion object {
         private const val SESSION_STATUS_ACTIVE = "ACTIVE"
         private const val SESSION_STATUS_COMPLETED = "COMPLETED"
+
+        private fun currentMonthRangeMillis(
+            now: ZonedDateTime = ZonedDateTime.now(ZoneId.systemDefault())
+        ): Pair<Long, Long> {
+            val monthStart = now
+                .withDayOfMonth(1)
+                .toLocalDate()
+                .atStartOfDay(now.zone)
+            val nextMonthStart = monthStart.plusMonths(1)
+            return monthStart.toInstant().toEpochMilli() to nextMonthStart.toInstant().toEpochMilli()
+        }
     }
 }

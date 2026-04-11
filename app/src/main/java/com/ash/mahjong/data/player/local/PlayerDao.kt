@@ -20,6 +20,24 @@ interface PlayerDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertPlayer(entity: PlayerEntity): Long
 
+    @Query(
+        """
+        UPDATE players
+        SET display_name = :displayName,
+            normalized_name = :normalizedName,
+            initial_score = :initialScore,
+            avatar_key = :avatarKey
+        WHERE id = :playerId
+        """
+    )
+    suspend fun updatePlayerProfile(
+        playerId: Int,
+        displayName: String,
+        normalizedName: String,
+        initialScore: Int,
+        avatarKey: String?
+    ): Int
+
     @Query("UPDATE players SET is_active = :isActive WHERE id = :playerId")
     suspend fun updatePlayerActiveStatus(playerId: Int, isActive: Boolean)
 

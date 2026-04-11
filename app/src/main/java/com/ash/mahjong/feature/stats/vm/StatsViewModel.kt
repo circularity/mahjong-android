@@ -9,12 +9,17 @@ import com.ash.mahjong.feature.stats.state.PlayerStatsUiModel
 import com.ash.mahjong.feature.stats.state.StatsUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.text.NumberFormat
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @HiltViewModel
 class StatsViewModel @Inject constructor(
@@ -52,13 +57,17 @@ class StatsViewModel @Inject constructor(
             winRounds = stats.winRounds,
             dianPaoRounds = stats.dianPaoRounds,
             winRateProgress = (stats.winRate / 100f).coerceIn(0f, 1f),
-            winRateText = "${formatDecimal(stats.winRate)}%",
+            winRateText = formatPercent(stats.winRate),
             totalDelta = stats.totalDelta,
             totalDeltaText = formatSigned(stats.totalDelta),
             avgDeltaText = formatSigned(stats.avgDelta),
             recentRoundsText = stats.recentRounds
                 .take(5)
-                .joinToString(separator = "  ") { value -> formatSigned(value) }
+                .joinToString(separator = "  ") { value -> formatSigned(value) },
+            lastBattleTimeText = stats.lastBattleAt
+                ?.let(::formatDateTime)
+                .orEmpty(),
+            recentRounds = stats.recentRounds.take(10)
         )
     }
 
@@ -73,7 +82,18 @@ class StatsViewModel @Inject constructor(
         return if (value >= 0f) "+$rounded" else "-$rounded"
     }
 
-    private fun formatDecimal(value: Float): String {
-        return String.format("%.1f", value)
+    private fun formatPercent(value: Float): String {
+        return "${value.roundToInt()}%"
+    }
+
+    private fun formatDateTime(epochMillis: Long): String {
+        return Instant.ofEpochMilli(epochMillis)
+            .atZone(ZoneId.systemDefault())
+            .format(lastBattleTimeFormatter)
+    }
+
+    companion object {
+        private val lastBattleTimeFormatter: DateTimeFormatter =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.getDefault())
     }
 }

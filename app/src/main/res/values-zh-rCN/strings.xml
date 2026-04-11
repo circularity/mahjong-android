@@ -170,9 +170,12 @@
     <string name="players_stats_none">-</string>
     <string name="players_dialog_title">添加玩家</string>
     <string name="players_dialog_name_label">玩家姓名</string>
+    <string name="players_dialog_avatar_label">头像</string>
     <string name="players_dialog_name_placeholder">请输入玩家姓名</string>
     <string name="players_dialog_score_label">初始积分</string>
     <string name="players_dialog_confirm">确认添加</string>
+    <string name="players_dialog_edit_title">编辑玩家</string>
+    <string name="players_dialog_confirm_edit">保存修改</string>
     <string name="players_dialog_cancel">取消</string>
     <string name="players_dialog_error_empty_name">请输入玩家姓名。</string>
     <string name="players_dialog_error_duplicate_name">玩家姓名已存在。</string>
@@ -222,6 +225,7 @@
 
     <string name="stats_page_title">战绩统计</string>
     <string name="stats_players_compare_title">玩家数据对比</string>
+    <string name="stats_players_compare_subtitle">基于最近 100 局对阵数据分析</string>
     <string name="stats_empty_title">暂无已结算对局</string>
     <string name="stats_empty_subtitle">请先完成至少一局结算，再查看统计数据。</string>
     <string name="stats_total_score_label">总分</string>
@@ -232,7 +236,10 @@
     <string name="stats_metric_win_rounds">胜局</string>
     <string name="stats_metric_dianpao_rounds">点炮</string>
     <string name="stats_metric_total_rounds">总局</string>
+    <string name="stats_avg_delta_label">局均得失</string>
     <string name="stats_player_rounds_subtitle_template">共 %1$d 局</string>
+    <string name="stats_last_battle_time_template">上次对局：%1$s</string>
+    <string name="stats_recent_rounds_label">最近局得失</string>
     <string name="stats_rounds_win_template">对局：%1$d  胜局：%2$d  胜率：%3$s</string>
     <string name="stats_delta_template">累计得失：%1$s  局均得失：%2$s</string>
     <string name="stats_recent_rounds_template">最近局得失：%1$s</string>

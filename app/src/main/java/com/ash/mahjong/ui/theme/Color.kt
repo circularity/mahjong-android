@@ -16,7 +16,6 @@ val BattleTertiary = Color(0xFF555F78)
 val BattleOnTertiary = Color(0xFFF9F8FF)
 val BattleTertiaryContainer = Color(0xFFD5DFFD)
 val BattleOnTertiaryContainer = Color(0xFF465068)
-
 val BattleError = Color(0xFF9F403D)
 val BattleOnError = Color(0xFFFFF7F6)
 val BattleErrorContainer = Color(0xFFFE8983)
@@ -32,3 +31,8 @@ val BattleOutline = Color(0xFF6B7D8D)
 
 val BattleSurfaceContainerLow = Color(0xFFEAF2FD)
 val BattleSurfaceContainer = Color(0xFFE4EFFC)
+
+val StatsCanvasBackground = Color(0xFFF3F4EE)
+val StatsSurfaceMuted = Color(0xFFE8E9E1)
+val StatsZimoBackground = Color(0xFFE7FAF4)
+val StatsWinRateZeroRing = Color(0xFFE1E4DB)

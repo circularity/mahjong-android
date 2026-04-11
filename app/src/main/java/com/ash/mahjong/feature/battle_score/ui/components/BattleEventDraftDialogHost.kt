@@ -1,6 +1,5 @@
 package com.ash.mahjong.feature.battle_score.ui.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -29,7 +28,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -46,6 +44,7 @@ import com.ash.mahjong.feature.battle_score.state.EventDraftUiState
 import com.ash.mahjong.feature.battle_score.state.PlayerCardUiModel
 import com.ash.mahjong.feature.battle_score.state.PlayerStatus
 import com.ash.mahjong.feature.battle_score.ui.BattleScoreTestTags
+import com.ash.mahjong.ui.avatar.PlayerAvatarVisual
 
 @Composable
 fun BattleEventDraftDialogHost(
@@ -444,6 +443,7 @@ private fun StitchTargetPlayerCard(
     player: PlayerCardUiModel,
     onClick: () -> Unit
 ) {
+    val avatarContentDescription = stringResource(R.string.player_avatar_content_desc)
     val cardShape = RoundedCornerShape(20.dp)
     Surface(
         shape = cardShape,
@@ -471,14 +471,22 @@ private fun StitchTargetPlayerCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(modifier = Modifier.size(56.dp)) {
-                Image(
-                    painter = painterResource(R.drawable.ic_avatar_placeholder),
-                    contentDescription = null,
+                Box(
                     modifier = Modifier
                         .size(56.dp)
                         .clip(CircleShape)
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
-                )
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    PlayerAvatarVisual(
+                        avatarKey = player.avatarKey,
+                        avatarEmoji = player.avatarEmoji,
+                        fallbackText = player.name.take(1),
+                        contentDescription = avatarContentDescription,
+                        textStyle = MaterialTheme.typography.titleMedium
+                    )
+                }
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)

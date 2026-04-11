@@ -226,6 +226,16 @@ private fun PlayerCard(
 
                     Row(horizontalArrangement = Arrangement.spacedBy(spacing.xs)) {
                         PlayerActionButton(
+                            text = stringResource(R.string.battle_action_gang),
+                            onClick = { onGangClick(player.id) },
+                            enabled = isActionEnabled,
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier
+                                .weight(1f)
+                                .testTag(BattleScoreTestTags.gangButton(player.id))
+                        )
+                        PlayerActionButton(
                             text = stringResource(R.string.battle_action_hu),
                             onClick = { onHuClick(player.id) },
                             enabled = isActionEnabled,
@@ -244,16 +254,6 @@ private fun PlayerCard(
                             modifier = Modifier
                                 .weight(1f)
                                 .testTag(BattleScoreTestTags.zimoButton(player.id))
-                        )
-                        PlayerActionButton(
-                            text = stringResource(R.string.battle_action_gang),
-                            onClick = { onGangClick(player.id) },
-                            enabled = isActionEnabled,
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                            contentColor = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier
-                                .weight(1f)
-                                .testTag(BattleScoreTestTags.gangButton(player.id))
                         )
                     }
                 }

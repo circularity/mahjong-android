@@ -56,8 +56,10 @@ data class PlayerStats(
     val dianPaoRounds: Int,
     val winRate: Float,
     val totalDelta: Int,
+    val currentMonthDelta: Int,
     val avgDelta: Float,
-    val recentRounds: List<Int>
+    val recentRounds: List<Int>,
+    val lastBattleAt: Long? = null
 )
 
 object NoOpBattleRecordRepository : BattleRecordRepository {

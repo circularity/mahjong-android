@@ -22,7 +22,6 @@ private fun avatarImageResOrNull(avatarKey: String): Int? {
         "image_01" -> R.drawable.player_avatar_image_01
         "image_02" -> R.drawable.player_avatar_image_02
         "image_03" -> R.drawable.player_avatar_image_03
-        "image_04" -> R.drawable.player_avatar_image_04
         "image_05" -> R.drawable.player_avatar_image_05
         "image_06" -> R.drawable.player_avatar_image_06
         "image_07" -> R.drawable.player_avatar_image_07

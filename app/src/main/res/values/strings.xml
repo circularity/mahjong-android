@@ -170,9 +170,12 @@
     <string name="players_stats_none">-</string>
     <string name="players_dialog_title">Add Player</string>
     <string name="players_dialog_name_label">PLAYER NAME</string>
+    <string name="players_dialog_avatar_label">AVATAR</string>
     <string name="players_dialog_name_placeholder">Enter player name</string>
     <string name="players_dialog_score_label">INITIAL SCORE</string>
     <string name="players_dialog_confirm">Confirm Add</string>
+    <string name="players_dialog_edit_title">Edit Player</string>
+    <string name="players_dialog_confirm_edit">Save Changes</string>
     <string name="players_dialog_cancel">Cancel</string>
     <string name="players_dialog_error_empty_name">Please enter player name.</string>
     <string name="players_dialog_error_duplicate_name">Player name already exists.</string>
@@ -222,6 +225,7 @@
 
     <string name="stats_page_title">Battle Statistics</string>
     <string name="stats_players_compare_title">Player Data Comparison</string>
+    <string name="stats_players_compare_subtitle">Based on the latest 100 settled rounds</string>
     <string name="stats_empty_title">No settled rounds yet</string>
     <string name="stats_empty_subtitle">Finish at least one round to generate player statistics.</string>
     <string name="stats_total_score_label">Total Score</string>
@@ -232,7 +236,10 @@
     <string name="stats_metric_win_rounds">Wins</string>
     <string name="stats_metric_dianpao_rounds">Discard Losses</string>
     <string name="stats_metric_total_rounds">Rounds</string>
+    <string name="stats_avg_delta_label">Avg Delta</string>
     <string name="stats_player_rounds_subtitle_template">%1$d rounds</string>
+    <string name="stats_last_battle_time_template">Last Match: %1$s</string>
+    <string name="stats_recent_rounds_label">Recent Delta</string>
     <string name="stats_rounds_win_template">Rounds: %1$d  Wins: %2$d  Win Rate: %3$s</string>
     <string name="stats_delta_template">Total Delta: %1$s  Avg Delta: %2$s</string>
     <string name="stats_recent_rounds_template">Recent rounds: %1$s</string>

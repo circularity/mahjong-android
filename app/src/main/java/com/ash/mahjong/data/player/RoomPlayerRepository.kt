@@ -12,6 +12,23 @@ class RoomPlayerRepository @Inject constructor(
     private val playerDao: PlayerDao
 ) : PlayerRepository {
 
+    suspend fun addPlayer(name: String, initialScore: Int): AddPlayerResult {
+        return addPlayer(name = name, initialScore = initialScore, avatarKey = null)
+    }
+
+    suspend fun updatePlayerProfile(
+        playerId: Int,
+        name: String,
+        initialScore: Int
+    ): AddPlayerResult {
+        return updatePlayerProfile(
+            playerId = playerId,
+            name = name,
+            initialScore = initialScore,
+            avatarKey = null
+        )
+    }
+
     override fun observePlayers(): Flow<List<Player>> {
         return playerDao.observeAllPlayers().map { entities ->
             entities.map(::entityToPlayer)
@@ -24,24 +41,58 @@ class RoomPlayerRepository @Inject constructor(
         }
     }
 
-    override suspend fun addPlayer(name: String, initialScore: Int): AddPlayerResult {
+    override suspend fun addPlayer(
+        name: String,
+        initialScore: Int,
+        avatarKey: String?
+    ): AddPlayerResult {
         val displayName = name.trim()
         if (displayName.isBlank()) {
             return AddPlayerResult.InvalidName
         }
 
         val normalizedName = normalizePlayerName(displayName)
+        val normalizedAvatarKey = PlayerAnimalAvatarCatalog.normalizeAvatarKey(avatarKey)
+            ?: PlayerAnimalAvatarCatalog.randomAvatarKey()
         val entity = PlayerEntity(
             displayName = displayName,
             normalizedName = normalizedName,
             initialScore = initialScore,
             createdAt = System.currentTimeMillis(),
             isActive = true,
-            avatarKey = PlayerAnimalAvatarCatalog.randomAvatarKey()
+            avatarKey = normalizedAvatarKey
         )
 
         return try {
             playerDao.insertPlayer(entity)
+            AddPlayerResult.Success
+        } catch (_: SQLiteConstraintException) {
+            AddPlayerResult.DuplicateName
+        }
+    }
+
+    override suspend fun updatePlayerProfile(
+        playerId: Int,
+        name: String,
+        initialScore: Int,
+        avatarKey: String?
+    ): AddPlayerResult {
+        val displayName = name.trim()
+        if (displayName.isBlank()) {
+            return AddPlayerResult.InvalidName
+        }
+        val normalizedName = normalizePlayerName(displayName)
+        val targetPlayer = playerDao.getPlayerById(playerId) ?: return AddPlayerResult.InvalidName
+        val normalizedAvatarKey = PlayerAnimalAvatarCatalog.normalizeAvatarKey(avatarKey)
+            ?: targetPlayer.avatarKey
+        return try {
+            playerDao.updatePlayerProfile(
+                playerId = playerId,
+                displayName = displayName,
+                normalizedName = normalizedName,
+                initialScore = initialScore,
+                avatarKey = normalizedAvatarKey
+            )
             AddPlayerResult.Success
         } catch (_: SQLiteConstraintException) {
             AddPlayerResult.DuplicateName

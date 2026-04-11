@@ -60,6 +60,21 @@ class RoomPlayerRepositoryTest {
     }
 
     @Test
+    fun addPlayer_withSelectedAvatar_persistsAvatarKey() = runTest {
+        val repository = RoomPlayerRepository(FakePlayerDao())
+
+        val result = repository.addPlayer(
+            name = "AvatarUser",
+            initialScore = 100,
+            avatarKey = "dog"
+        )
+        val inserted = repository.observePlayers().first().first()
+
+        assertEquals(AddPlayerResult.Success, result)
+        assertEquals("dog", inserted.avatarKey)
+    }
+
+    @Test
     fun updatePlayerActiveStatus_updatesPlayerState() = runTest {
         val repository = RoomPlayerRepository(FakePlayerDao())
         repository.addPlayer("Cindy", 100)
@@ -221,6 +236,37 @@ private class FakePlayerDao : PlayerDao {
             (current + persisted).sortedByDescending { it.createdAt }
         }
         return persisted.id.toLong()
+    }
+
+    override suspend fun updatePlayerProfile(
+        playerId: Int,
+        displayName: String,
+        normalizedName: String,
+        initialScore: Int,
+        avatarKey: String?
+    ): Int {
+        val target = entities.value.firstOrNull { it.id == playerId } ?: return 0
+        val duplicateExists = entities.value.any { player ->
+            player.id != playerId && player.normalizedName == normalizedName
+        }
+        if (duplicateExists) {
+            throw SQLiteConstraintException("duplicate normalized_name")
+        }
+        entities.update { players ->
+            players.map { player ->
+                if (player.id == playerId) {
+                    target.copy(
+                        displayName = displayName,
+                        normalizedName = normalizedName,
+                        initialScore = initialScore,
+                        avatarKey = avatarKey
+                    )
+                } else {
+                    player
+                }
+            }
+        }
+        return 1
     }
 
     override suspend fun updatePlayerActiveStatus(playerId: Int, isActive: Boolean) {

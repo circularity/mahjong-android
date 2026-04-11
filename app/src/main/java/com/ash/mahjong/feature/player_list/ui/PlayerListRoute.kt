@@ -19,9 +19,11 @@ fun PlayerListRoute(
         onPlayerNameChange = viewModel::onPlayerNameChange,
         onDecreaseInitialScore = viewModel::onDecreaseInitialScore,
         onIncreaseInitialScore = viewModel::onIncreaseInitialScore,
+        onSelectDialogAvatar = viewModel::onSelectDialogAvatar,
         onConfirmAddPlayer = viewModel::onConfirmAddPlayer,
         onTogglePlayerActiveClick = viewModel::onTogglePlayerActiveClick,
         onTogglePlayerRoleClick = viewModel::onTogglePlayerRoleClick,
-        onChangePlayerAvatarClick = viewModel::onChangePlayerAvatarClick
+        onChangePlayerAvatarClick = viewModel::onChangePlayerAvatarClick,
+        onPlayerLongClick = viewModel::onPlayerLongClick
     )
 }

@@ -15,6 +15,23 @@ class FakePlayerRepository(
     initialPlayers: List<Player> = emptyList()
 ) : PlayerRepository {
 
+    suspend fun addPlayer(name: String, initialScore: Int): AddPlayerResult {
+        return addPlayer(name = name, initialScore = initialScore, avatarKey = null)
+    }
+
+    suspend fun updatePlayerProfile(
+        playerId: Int,
+        name: String,
+        initialScore: Int
+    ): AddPlayerResult {
+        return updatePlayerProfile(
+            playerId = playerId,
+            name = name,
+            initialScore = initialScore,
+            avatarKey = null
+        )
+    }
+
     private var nextId = (initialPlayers.maxOfOrNull { it.id } ?: 0) + 1
     private val playersFlow = MutableStateFlow(initialPlayers.sortedByDescending { it.createdAt })
 
@@ -24,7 +41,11 @@ class FakePlayerRepository(
         return playersFlow.map { players -> players.take(limit) }
     }
 
-    override suspend fun addPlayer(name: String, initialScore: Int): AddPlayerResult {
+    override suspend fun addPlayer(
+        name: String,
+        initialScore: Int,
+        avatarKey: String?
+    ): AddPlayerResult {
         val displayName = name.trim()
         if (displayName.isBlank()) {
             return AddPlayerResult.InvalidName
@@ -38,6 +59,8 @@ class FakePlayerRepository(
             return AddPlayerResult.DuplicateName
         }
 
+        val normalizedAvatarKey = PlayerAnimalAvatarCatalog.normalizeAvatarKey(avatarKey)
+            ?: PlayerAnimalAvatarCatalog.randomAvatarKey()
         playersFlow.update { current ->
             listOf(
                 Player(
@@ -45,9 +68,44 @@ class FakePlayerRepository(
                     name = displayName,
                     score = initialScore,
                     createdAt = System.currentTimeMillis(),
-                    avatarKey = PlayerAnimalAvatarCatalog.randomAvatarKey()
+                    avatarKey = normalizedAvatarKey
                 )
             ) + current
+        }
+        return AddPlayerResult.Success
+    }
+
+    override suspend fun updatePlayerProfile(
+        playerId: Int,
+        name: String,
+        initialScore: Int,
+        avatarKey: String?
+    ): AddPlayerResult {
+        val displayName = name.trim()
+        if (displayName.isBlank()) {
+            return AddPlayerResult.InvalidName
+        }
+        val normalized = displayName.lowercase(Locale.ROOT)
+        val duplicateExists = playersFlow.value.any { player ->
+            player.id != playerId && player.name.trim().lowercase(Locale.ROOT) == normalized
+        }
+        if (duplicateExists) {
+            return AddPlayerResult.DuplicateName
+        }
+
+        val normalizedAvatarKey = PlayerAnimalAvatarCatalog.normalizeAvatarKey(avatarKey)
+        playersFlow.update { players ->
+            players.map { player ->
+                if (player.id == playerId) {
+                    player.copy(
+                        name = displayName,
+                        score = initialScore,
+                        avatarKey = normalizedAvatarKey ?: player.avatarKey
+                    )
+                } else {
+                    player
+                }
+            }
         }
         return AddPlayerResult.Success
     }

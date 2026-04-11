@@ -3,6 +3,8 @@ package com.ash.mahjong.feature.player_list.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,8 +14,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.PauseCircle
+import androidx.compose.material.icons.outlined.PlayCircle
+import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -95,19 +103,28 @@ internal fun AddPlayerCard(
 }
 
 @Composable
+@OptIn(ExperimentalFoundationApi::class)
 internal fun PlayerListCard(
     player: PlayerListItemUiModel,
     onToggleActiveClick: () -> Unit,
     onToggleRoleClick: () -> Unit,
-    onAvatarClick: () -> Unit
+    onAvatarClick: () -> Unit,
+    onLongClick: () -> Unit
 ) {
     val containerColor = if (player.isActive) Color.White else Color(0xFFF4F5F7)
     val scoreColor = if (player.isActive) PlayerListColors.Primary else PlayerListColors.OnSurfaceVariant
     val cardAlpha = if (player.isActive) 1f else 0.78f
+    val cardShape = RoundedCornerShape(24.dp)
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(cardShape)
+            .combinedClickable(
+                onClick = {},
+                onLongClick = onLongClick
+            ),
+        shape = cardShape,
         colors = CardDefaults.cardColors(containerColor = containerColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
@@ -207,6 +224,17 @@ internal fun PlayerListCard(
                     } else {
                         stringResource(R.string.players_status_inactive)
                     },
+                    icon = if (player.isActive) Icons.Outlined.PauseCircle else Icons.Outlined.PlayCircle,
+                    containerColor = if (player.isActive) {
+                        Color(0xFFDBF0D5)
+                    } else {
+                        Color(0xFFE6E8ED)
+                    },
+                    contentColor = if (player.isActive) {
+                        Color(0xFF2E5D2A)
+                    } else {
+                        Color(0xFF4F5661)
+                    },
                     onClick = onToggleActiveClick
                 )
                 PlayerToggleButton(
@@ -214,6 +242,22 @@ internal fun PlayerListCard(
                         stringResource(R.string.players_role_on_table)
                     } else {
                         stringResource(R.string.players_role_horse)
+                    },
+                    trailingText = if (player.playerRole == PlayerRole.ON_TABLE) {
+                        stringResource(R.string.players_role_horse)
+                    } else {
+                        stringResource(R.string.players_role_on_table)
+                    },
+                    icon = Icons.Outlined.SwapHoriz,
+                    containerColor = if (player.playerRole == PlayerRole.ON_TABLE) {
+                        Color(0xFFDCE8FF)
+                    } else {
+                        Color(0xFFFFE8CC)
+                    },
+                    contentColor = if (player.playerRole == PlayerRole.ON_TABLE) {
+                        Color(0xFF31518A)
+                    } else {
+                        Color(0xFF7A4B1C)
                     },
                     onClick = onToggleRoleClick
                 )
@@ -334,22 +378,45 @@ private fun PlayerRoleTag(role: PlayerRole) {
 @Composable
 private fun PlayerToggleButton(
     text: String,
+    icon: ImageVector,
+    trailingText: String? = null,
+    containerColor: Color = Color(0xFFF0F3F8),
+    contentColor: Color = PlayerListColors.OnSurfaceVariant,
     onClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(10.dp))
-            .background(Color(0xFFF0F3F8))
+            .background(containerColor)
             .clickable(onClick = onClick)
             .padding(horizontal = 10.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = text,
-            color = PlayerListColors.OnSurfaceVariant,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold
-        )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = text,
+                color = contentColor,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = contentColor,
+                modifier = Modifier.size(14.dp)
+            )
+            trailingText?.let { value ->
+                Text(
+                    text = value,
+                    color = contentColor,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
     }
 }
 

@@ -18,6 +18,7 @@ object PlayerAnimalAvatarCatalog {
     private val avatars = listOf(
         PlayerAvatar(key = "cat", emoji = "🐱", type = AvatarType.ANIMAL),
         PlayerAvatar(key = "dog", emoji = "🐶", type = AvatarType.ANIMAL),
+        PlayerAvatar(key = "horse", emoji = "🐴", type = AvatarType.ANIMAL),
         PlayerAvatar(key = "rabbit", emoji = "🐰", type = AvatarType.ANIMAL),
         PlayerAvatar(key = "fox", emoji = "🦊", type = AvatarType.ANIMAL),
         PlayerAvatar(key = "panda", emoji = "🐼", type = AvatarType.ANIMAL),
@@ -27,7 +28,6 @@ object PlayerAnimalAvatarCatalog {
         PlayerAvatar(key = "image_01", emoji = null, type = AvatarType.IMAGE),
         PlayerAvatar(key = "image_02", emoji = null, type = AvatarType.IMAGE),
         PlayerAvatar(key = "image_03", emoji = null, type = AvatarType.IMAGE),
-        PlayerAvatar(key = "image_04", emoji = null, type = AvatarType.IMAGE),
         PlayerAvatar(key = "image_05", emoji = null, type = AvatarType.IMAGE),
         PlayerAvatar(key = "image_06", emoji = null, type = AvatarType.IMAGE),
         PlayerAvatar(key = "image_07", emoji = null, type = AvatarType.IMAGE),
@@ -35,6 +35,10 @@ object PlayerAnimalAvatarCatalog {
         PlayerAvatar(key = "image_09", emoji = null, type = AvatarType.IMAGE)
     )
     private val avatarByKey = avatars.associateBy { it.key }
+
+    fun allAvatarKeys(): List<String> = avatars.map { avatar -> avatar.key }
+
+    fun firstAvatarKey(): String = avatars.first().key
 
     fun randomAvatarKey(random: Random = Random.Default): String {
         return avatars[random.nextInt(avatars.size)].key

@@ -36,6 +36,7 @@ class StatsViewModelTest {
                     dianPaoRounds = 2,
                     winRate = 40f,
                     totalDelta = 15,
+                    currentMonthDelta = 6,
                     avgDelta = 1.5f,
                     recentRounds = listOf(4, -2, 0)
                 )
@@ -52,7 +53,7 @@ class StatsViewModelTest {
         assertEquals(5, player.gangRounds)
         assertEquals(2, player.dianPaoRounds)
         assertEquals(0.4f, player.winRateProgress)
-        assertEquals("40.0%", player.winRateText)
+        assertEquals("40%", player.winRateText)
         assertEquals(15, player.totalDelta)
         assertEquals("+15", player.totalDeltaText)
         assertEquals("+1.5", player.avgDeltaText)
@@ -79,6 +80,7 @@ class StatsViewModelTest {
                     dianPaoRounds = 0,
                     winRate = 50f,
                     totalDelta = 8,
+                    currentMonthDelta = 8,
                     avgDelta = 4f,
                     recentRounds = listOf(8)
                 )

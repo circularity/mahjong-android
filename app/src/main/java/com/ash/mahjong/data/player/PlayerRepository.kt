@@ -9,7 +9,15 @@ interface PlayerRepository {
 
     suspend fun addPlayer(
         name: String,
-        initialScore: Int
+        initialScore: Int,
+        avatarKey: String? = null
+    ): AddPlayerResult
+
+    suspend fun updatePlayerProfile(
+        playerId: Int,
+        name: String,
+        initialScore: Int,
+        avatarKey: String? = null
     ): AddPlayerResult
 
     suspend fun updatePlayerActiveStatus(

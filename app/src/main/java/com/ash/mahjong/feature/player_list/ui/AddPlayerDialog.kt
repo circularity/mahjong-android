@@ -1,6 +1,8 @@
 package com.ash.mahjong.feature.player_list.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +18,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -27,13 +28,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.ash.mahjong.R
+import com.ash.mahjong.data.player.PlayerAnimalAvatarCatalog
 import com.ash.mahjong.feature.player_list.state.AddPlayerDialogUiState
+import com.ash.mahjong.feature.player_list.state.PlayerDialogMode
+import com.ash.mahjong.ui.avatar.PlayerAvatarVisual
 import java.text.NumberFormat
 
 @Composable
@@ -43,8 +47,24 @@ internal fun AddPlayerDialog(
     onPlayerNameChange: (String) -> Unit,
     onDecreaseInitialScore: () -> Unit,
     onIncreaseInitialScore: () -> Unit,
+    onSelectAvatar: (String) -> Unit,
     onConfirmAddPlayer: () -> Unit
 ) {
+    val dialogTitleRes = if (dialogState.mode == PlayerDialogMode.EDIT) {
+        R.string.players_dialog_edit_title
+    } else {
+        R.string.players_dialog_title
+    }
+    val dialogConfirmRes = if (dialogState.mode == PlayerDialogMode.EDIT) {
+        R.string.players_dialog_confirm_edit
+    } else {
+        R.string.players_dialog_confirm
+    }
+    val avatarContentDescription = stringResource(R.string.players_avatar_content_description)
+    val selectedAvatarFallback = dialogState.playerName.trim().take(1).ifBlank {
+        stringResource(R.string.settings_profile_placeholder)
+    }
+    val selectedAvatarIsImage = PlayerAnimalAvatarCatalog.isImageAvatarKey(dialogState.selectedAvatarKey)
     Dialog(onDismissRequest = onDismissRequest) {
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -58,7 +78,7 @@ internal fun AddPlayerDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = stringResource(R.string.players_dialog_title),
+                    text = stringResource(dialogTitleRes),
                     color = PlayerListColors.Primary,
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 24.sp
@@ -70,13 +90,16 @@ internal fun AddPlayerDialog(
                         modifier = Modifier
                             .size(88.dp)
                             .clip(RoundedCornerShape(22.dp))
-                            .background(Color(0xFF15324A)),
+                            .background(if (selectedAvatarIsImage) Color.Black else Color(0xFF15324A)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_avatar_placeholder),
-                            contentDescription = stringResource(R.string.player_avatar_content_desc),
-                            tint = Color.Unspecified,
+                        PlayerAvatarVisual(
+                            avatarKey = dialogState.selectedAvatarKey,
+                            avatarEmoji = dialogState.selectedAvatarEmoji,
+                            fallbackText = selectedAvatarFallback,
+                            contentDescription = avatarContentDescription,
+                            textStyle = androidx.compose.material3.MaterialTheme.typography.headlineMedium,
+                            textColor = Color.White,
                             modifier = Modifier.size(72.dp)
                         )
                     }
@@ -102,6 +125,23 @@ internal fun AddPlayerDialog(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.players_dialog_avatar_label),
+                            color = PlayerListColors.OnSurfaceVariant.copy(alpha = 0.9f),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        AvatarLibraryGrid(
+                            selectedAvatarKey = dialogState.selectedAvatarKey,
+                            onSelectAvatar = onSelectAvatar,
+                            avatarContentDescription = avatarContentDescription,
+                            fallbackText = selectedAvatarFallback
+                        )
+                    }
+
                     Column(
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
@@ -211,7 +251,7 @@ internal fun AddPlayerDialog(
                     )
                 ) {
                     Text(
-                        text = stringResource(R.string.players_dialog_confirm),
+                        text = stringResource(dialogConfirmRes),
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp
                     )
@@ -225,6 +265,87 @@ internal fun AddPlayerDialog(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun AvatarLibraryGrid(
+    selectedAvatarKey: String,
+    onSelectAvatar: (String) -> Unit,
+    avatarContentDescription: String,
+    fallbackText: String
+) {
+    val avatarKeys = PlayerAnimalAvatarCatalog.allAvatarKeys()
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        avatarKeys.chunked(5).forEach { row ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                row.forEach { avatarKey ->
+                    AvatarChoiceItem(
+                        avatarKey = avatarKey,
+                        selected = selectedAvatarKey == avatarKey,
+                        avatarContentDescription = avatarContentDescription,
+                        fallbackText = fallbackText,
+                        onClick = { onSelectAvatar(avatarKey) }
+                    )
+                }
+                repeat(5 - row.size) {
+                    Spacer(modifier = Modifier.size(44.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AvatarChoiceItem(
+    avatarKey: String,
+    selected: Boolean,
+    avatarContentDescription: String,
+    fallbackText: String,
+    onClick: () -> Unit
+) {
+    val isImageAvatar = PlayerAnimalAvatarCatalog.isImageAvatarKey(avatarKey)
+    val backgroundColor = if (isImageAvatar) Color.Black else Color(0xFF15324A)
+    val borderColor = if (selected) {
+        Color(0xFFBCEFAE)
+    } else {
+        Color(0xFF3F6F9C).copy(alpha = 0.45f)
+    }
+    val avatarEmoji = PlayerAnimalAvatarCatalog.emojiForKey(avatarKey)
+
+    Box(
+        modifier = Modifier
+            .size(44.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(backgroundColor)
+            .border(1.2.dp, borderColor, RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        if (isImageAvatar) {
+            PlayerAvatarVisual(
+                avatarKey = avatarKey,
+                avatarEmoji = avatarEmoji,
+                fallbackText = fallbackText,
+                contentDescription = avatarContentDescription,
+                textStyle = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                textColor = Color.White,
+                modifier = Modifier.size(34.dp)
+            )
+        } else {
+            Text(
+                text = avatarEmoji.ifBlank { fallbackText },
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                textAlign = TextAlign.Center
+            )
         }
     }
 }

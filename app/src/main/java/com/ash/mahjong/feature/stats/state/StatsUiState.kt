@@ -20,5 +20,7 @@ data class PlayerStatsUiModel(
     val totalDelta: Int,
     val totalDeltaText: String,
     val avgDeltaText: String,
-    val recentRoundsText: String
+    val recentRoundsText: String,
+    val lastBattleTimeText: String,
+    val recentRounds: List<Int> = emptyList()
 )

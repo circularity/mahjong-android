@@ -5,6 +5,7 @@ import com.ash.mahjong.data.player.PlayerRole
 
 data class PlayerListUiState(
     val players: List<PlayerListItemUiModel> = emptyList(),
+    val monthlyBestPlayerName: String = "",
     val addPlayerDialog: AddPlayerDialogUiState = AddPlayerDialogUiState()
 ) {
     val activePlayerCount: Int
@@ -22,18 +23,25 @@ data class PlayerListUiState(
     val totalPlayerCount: Int
         get() = players.size
 
-    val monthlyBestPlayerName: String
-        get() = players.maxByOrNull { it.score }?.name.orEmpty()
 }
 
 data class AddPlayerDialogUiState(
     val visible: Boolean = false,
+    val mode: PlayerDialogMode = PlayerDialogMode.ADD,
+    val editingPlayerId: Int? = null,
     val playerName: String = "",
     val initialScore: Int = 0,
+    val selectedAvatarKey: String = "",
+    val selectedAvatarEmoji: String = "",
     @param:StringRes val errorMessageRes: Int? = null
 ) {
     val canConfirm: Boolean
         get() = playerName.isNotBlank()
+}
+
+enum class PlayerDialogMode {
+    ADD,
+    EDIT
 }
 
 data class PlayerListItemUiModel(
