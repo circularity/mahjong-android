@@ -34,6 +34,22 @@
 
 构建完成后可在 Android Studio 或设备上安装运行 Debug 包。
 
+## 应用截图
+
+| 对局 | 统计 |
+| --- | --- |
+| ![对局页面](docs/screenshots/01_tab_match.png) | ![统计页面](docs/screenshots/02_tab_stats.png) |
+
+| 玩家 | 设置 |
+| --- | --- |
+| ![玩家页面](docs/screenshots/03_tab_players.png) | ![设置页面](docs/screenshots/04_tab_settings.png) |
+
+## 下载与发布
+
+- `v1.0.0` Release 页面：[GitHub Release v1.0.0](https://github.com/circularity/mahjong-android/releases/tag/v1.0.0)
+- APK 产物命名建议：`mahjong-v1.0.0-release.apk`（Release 签名）
+- 发布说明模板：`docs/releases/v1.0.0.md`
+
 ## 常用命令
 
 在仓库根目录执行：
