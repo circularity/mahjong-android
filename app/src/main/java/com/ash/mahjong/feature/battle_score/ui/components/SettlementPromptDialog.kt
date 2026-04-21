@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,6 +17,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -106,18 +109,22 @@ private fun RoundSettlementDialog(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .widthIn(max = 420.dp),
+                    .widthIn(max = 420.dp)
+                    .fillMaxHeight(0.92f),
                 shape = RoundedCornerShape(32.dp),
                 color = MaterialTheme.colorScheme.surface,
                 tonalElevation = 8.dp,
                 shadowElevation = 24.dp
             ) {
                 Column(
-                    modifier = Modifier.padding(bottom = 24.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 24.dp),
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
                     SettlementHeader(onDismiss = onDismiss)
                     SettlementList(
+                        modifier = Modifier.weight(1f),
                         entries = orderedEntries,
                         winnerEntryKey = winnerEntryKey,
                         lowestDelta = lowestDelta
@@ -163,17 +170,18 @@ private fun SettlementHeader(onDismiss: () -> Unit) {
 
 @Composable
 private fun SettlementList(
+    modifier: Modifier = Modifier,
     entries: List<SettlementEntryUiModel>,
     winnerEntryKey: String?,
     lowestDelta: Int
 ) {
-    Column(
-        modifier = Modifier
+    LazyColumn(
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        entries.forEach { entry ->
+        items(entries, key = { it.entryKey }) { entry ->
             val delta = entry.roundDelta.toDeltaValue()
             SettlementPlayerRow(
                 entry = entry,

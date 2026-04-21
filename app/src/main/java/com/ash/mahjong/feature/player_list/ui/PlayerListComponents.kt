@@ -17,9 +17,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.PauseCircle
 import androidx.compose.material.icons.outlined.PlayCircle
-import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -254,16 +254,16 @@ internal fun PlayerListCard(
                 )
                 PlayerToggleButton(
                     text = if (player.playerRole == PlayerRole.ON_TABLE) {
-                        stringResource(R.string.players_role_on_table)
+                        stringResource(R.string.players_role_action_rest)
                     } else {
                         stringResource(R.string.players_role_horse)
                     },
                     trailingText = if (player.playerRole == PlayerRole.ON_TABLE) {
                         stringResource(R.string.players_role_horse)
                     } else {
-                        stringResource(R.string.players_role_on_table)
+                        stringResource(R.string.players_role_action_join_table)
                     },
-                    icon = Icons.Outlined.SwapHoriz,
+                    icon = Icons.AutoMirrored.Outlined.ArrowForward,
                     containerColor = if (player.playerRole == PlayerRole.ON_TABLE) {
                         Color(0xFFDCE8FF)
                     } else {
@@ -320,7 +320,7 @@ private fun Avatar(
         PlayerTrend.FLAT -> Color(0xFFFFF7EE)
         PlayerTrend.DOWN -> Color(0xFFFAF5EE)
     }
-    val avatarContentDescription = stringResource(R.string.players_avatar_content_description)
+    val avatarContentDescription = stringResource(R.string.player_avatar_content_desc)
     val avatarBorderColor = Color(0x1F233442)
 
     Box {
@@ -334,7 +334,7 @@ private fun Avatar(
                     color = avatarBorderColor,
                     shape = RoundedCornerShape(16.dp)
                 )
-                .clickable(onClick = onClick)
+                .clickable(enabled = false, onClick = onClick)
                 .semantics {
                     contentDescription = avatarContentDescription
                 },

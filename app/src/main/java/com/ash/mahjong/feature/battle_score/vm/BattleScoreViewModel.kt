@@ -34,6 +34,7 @@ import com.ash.mahjong.feature.battle_score.state.HorseUiModel
 import com.ash.mahjong.feature.battle_score.state.LiveLogActionType
 import com.ash.mahjong.feature.battle_score.state.LiveLogHighlight
 import com.ash.mahjong.feature.battle_score.state.LiveLogItemUiModel
+import com.ash.mahjong.feature.battle_score.state.LiveLogRelatedPlayerUiModel
 import com.ash.mahjong.feature.battle_score.state.PlayerCardUiModel
 import com.ash.mahjong.feature.battle_score.state.PlayerStatus
 import com.ash.mahjong.feature.battle_score.state.ResetAllConfirmStep
@@ -71,6 +72,7 @@ class BattleScoreViewModel @Inject constructor(
     private var nextLiveLogId: Int = 0
     private var nextWinOrder: Int = 1
     private var nextActionGroupId: Long = 1
+    private var currentDealerPlayerId: Int? = null
 
     private val _uiState = MutableStateFlow(createInitialState())
     val uiState: StateFlow<BattleScoreUiState> = _uiState.asStateFlow()
@@ -119,9 +121,11 @@ class BattleScoreViewModel @Inject constructor(
                 latestAllPlayers = players
                 boundHorseNamesByPlayerId = buildBoundHorseNamesByPlayerId(activeHorses)
                 reconcilePlayerState(players = homePlayers)
+                ensureCurrentDealerPlayerId(players = homePlayers)
                 val requiresSetup = homePlayers.size < BATTLE_PLAYER_LIMIT
                 _uiState.update { state ->
                     state.copy(
+                        isPlayersLoaded = true,
                         players = buildPlayerUiModels(homePlayers),
                         horses = horseUiModels,
                         horseBindingDraft = state.horseBindingDraft?.takeIf { draft ->
@@ -156,7 +160,7 @@ class BattleScoreViewModel @Inject constructor(
                 } else {
                     draft.copy(
                         gangType = intent.gangType,
-                        targetId = if (intent.gangType == GangType.DIAN) draft.targetId else null
+                        targetId = null
                     )
                 }
             }
@@ -211,7 +215,7 @@ class BattleScoreViewModel @Inject constructor(
     }
 
     private fun startEventDraft(actorId: Int, action: BattleAction) {
-        if (uiState.value.requiresPlayerSetup || !isPlayerActive(actorId)) {
+        if (uiState.value.requiresPlayerSetup || !canStartActionDraft(actorId, action)) {
             return
         }
         _uiState.update { state ->
@@ -333,7 +337,6 @@ class BattleScoreViewModel @Inject constructor(
             )
             _uiState.update { state ->
                 state.copy(
-                    playerSwapDialogVisible = false,
                     horseBindingDraft = null,
                     eventDraft = null,
                     drawSettlementDraft = null
@@ -435,7 +438,7 @@ class BattleScoreViewModel @Inject constructor(
         draft: EventDraftUiState,
         selectedMultiplier: Int
     ) {
-        if (!isPlayerActive(draft.actorId)) {
+        if (!canApplyScoringDraft(draft)) {
             dismissEventDraft()
             return
         }
@@ -468,7 +471,7 @@ class BattleScoreViewModel @Inject constructor(
                         if (targetId !in activeTargetIds) return
                         PendingScoringAction(
                             actionType = BattleScoreActionType.GANG_DIAN,
-                            actorStatus = PlayerStatus.ACTIVE,
+                            actorStatus = actorStatusAfterGang(actorId = draft.actorId),
                             targetIds = listOf(targetId)
                         )
                     }
@@ -477,7 +480,7 @@ class BattleScoreViewModel @Inject constructor(
                         if (activeTargetIds.isEmpty()) return
                         PendingScoringAction(
                             actionType = BattleScoreActionType.GANG_BA,
-                            actorStatus = PlayerStatus.ACTIVE,
+                            actorStatus = actorStatusAfterGang(actorId = draft.actorId),
                             targetIds = activeTargetIds
                         )
                     }
@@ -486,7 +489,7 @@ class BattleScoreViewModel @Inject constructor(
                         if (activeTargetIds.isEmpty()) return
                         PendingScoringAction(
                             actionType = BattleScoreActionType.GANG_AN,
-                            actorStatus = PlayerStatus.ACTIVE,
+                            actorStatus = actorStatusAfterGang(actorId = draft.actorId),
                             targetIds = activeTargetIds
                         )
                     }
@@ -514,7 +517,6 @@ class BattleScoreViewModel @Inject constructor(
         )
         val deltaByPlayerId = applyHorseFollowDelta(
             baseDeltaByPlayerId = baseDeltaByPlayerId,
-            actionType = scoringAction.actionType,
             actorId = draft.actorId,
             targetIds = scoringAction.targetIds
         )
@@ -551,25 +553,13 @@ class BattleScoreViewModel @Inject constructor(
             )
         )
 
-        val actorDelta = deltaByPlayerId[draft.actorId] ?: 0
-        val liveLog = LiveLogItemUiModel(
-            id = nextLiveLogId++,
-            actorName = playerNameOf(draft.actorId),
+        val scoringLogs = buildScoringLiveLogs(
+            actorId = draft.actorId,
             actionType = scoringAction.toLiveLogActionType(),
-            relatedPlayerNames = scoringRelatedPlayerNames(
-                actorId = draft.actorId,
-                fallbackTargetIds = scoringAction.targetIds,
-                deltaByPlayerId = deltaByPlayerId
-            ),
-            amount = formatDelta(actorDelta),
-            highlight = when {
-                actorDelta > 0 -> LiveLogHighlight.POSITIVE
-                actorDelta < 0 -> LiveLogHighlight.NEGATIVE
-                else -> LiveLogHighlight.NEUTRAL
-            }
+            fallbackTargetIds = scoringAction.targetIds,
+            deltaByPlayerId = deltaByPlayerId
         )
-
-        val updatedLogs = listOf(liveLog) + uiState.value.liveLogs.take(MAX_LOG_COUNT - 1)
+        val updatedLogs = (scoringLogs + uiState.value.liveLogs).take(MAX_LOG_COUNT)
         val settlementPrompt = if (huPlayerCount() >= AUTO_SETTLE_HU_COUNT) {
             SettlementPromptUiState(type = SettlementPromptType.AUTO_THREE_HU)
         } else {
@@ -659,6 +649,7 @@ class BattleScoreViewModel @Inject constructor(
         nextWinOrder = 1
         nextLiveLogId = 0
         nextActionGroupId = 1
+        currentDealerPlayerId = latestPlayers.firstOrNull()?.id
         undoStack.clear()
         roundScoringHistory.clear()
         pendingRoundEvents.clear()
@@ -865,52 +856,35 @@ class BattleScoreViewModel @Inject constructor(
             roundScoringHistory.removeAll(refundedGangRecords.toSet())
         }
 
-        val gangRefundLogs = refundedGangRecords.mapNotNull { record ->
-            val actorDelta = -(record.deltaByPlayerId[record.actorId] ?: 0)
-            if (actorDelta == 0) {
-                return@mapNotNull null
-            }
-            val relatedPlayerIds = record.deltaByPlayerId.keys
-                .filter { playerId -> playerId != record.actorId }
-            LiveLogItemUiModel(
-                id = nextLiveLogId++,
-                actorName = playerNameOf(record.actorId),
+        val gangRefundLogs = refundedGangRecords.flatMap { record ->
+            val refundedDeltaByPlayerId = record.deltaByPlayerId.mapValues { (_, delta) -> -delta }
+            buildScoringLiveLogs(
+                actorId = record.actorId,
                 actionType = LiveLogActionType.GANG_REFUND,
-                relatedPlayerNames = playerNamesOfAny(relatedPlayerIds),
-                amount = formatDelta(actorDelta),
-                highlight = when {
-                    actorDelta > 0 -> LiveLogHighlight.POSITIVE
-                    actorDelta < 0 -> LiveLogHighlight.NEGATIVE
-                    else -> LiveLogHighlight.NEUTRAL
-                }
+                fallbackTargetIds = refundedDeltaByPlayerId.keys
+                    .filter { playerId -> playerId != record.actorId },
+                deltaByPlayerId = refundedDeltaByPlayerId
             )
         }
 
         val actorId = tingPlayerIds.firstOrNull() ?: orderedPendingPlayerIds.firstOrNull()
-        val actorDelta = actorId?.let { deltaByPlayerId[it] } ?: 0
         val relatedPlayerIds = if (tingPlayerIds.isNotEmpty()) {
             tingPlayerIds + nonTingPlayerIds
         } else {
             orderedPendingPlayerIds
         }.filter { it != actorId }
 
-        val drawLog = actorId?.let {
-            LiveLogItemUiModel(
-                id = nextLiveLogId++,
-                actorName = playerNameOf(it),
+        val drawLogs = actorId?.let { drawActorId ->
+            buildScoringLiveLogs(
+                actorId = drawActorId,
                 actionType = LiveLogActionType.DRAW_SETTLEMENT,
-                relatedPlayerNames = playerNamesOf(relatedPlayerIds),
-                amount = formatDelta(actorDelta),
-                highlight = when {
-                    actorDelta > 0 -> LiveLogHighlight.POSITIVE
-                    actorDelta < 0 -> LiveLogHighlight.NEGATIVE
-                    else -> LiveLogHighlight.NEUTRAL
-                }
+                fallbackTargetIds = relatedPlayerIds,
+                deltaByPlayerId = deltaByPlayerId
             )
-        }
+        }.orEmpty()
 
         val settlementLogs = buildList {
-            drawLog?.let(::add)
+            addAll(drawLogs)
             addAll(gangRefundLogs)
         }
         val settlementActionGroupId = nextActionGroupId++
@@ -948,11 +922,10 @@ class BattleScoreViewModel @Inject constructor(
                 )
             )
         }
-        val remainingSlots = (MAX_LOG_COUNT - settlementLogs.size).coerceAtLeast(0)
         val updatedLogs = if (settlementLogs.isEmpty()) {
             uiState.value.liveLogs
         } else {
-            settlementLogs + uiState.value.liveLogs.take(remainingSlots)
+            (settlementLogs + uiState.value.liveLogs).take(MAX_LOG_COUNT)
         }
 
         _uiState.update { state ->
@@ -992,6 +965,9 @@ class BattleScoreViewModel @Inject constructor(
 
     private fun startNextRound() {
         clearHorseBindingsForNextRound()
+        currentDealerPlayerId = firstWinningPlayerIdOfCurrentRound()
+            ?: currentDealerPlayerId
+            ?: latestPlayers.firstOrNull()?.id
 
         roundDeltaByPlayerId.keys.toList().forEach { playerId ->
             roundDeltaByPlayerId[playerId] = 0
@@ -1190,6 +1166,7 @@ class BattleScoreViewModel @Inject constructor(
         return BattleScoreUiState(
             currentRound = 1,
             windLabelRes = R.string.battle_wind_east,
+            isPlayersLoaded = false,
             players = emptyList(),
             horses = emptyList(),
             liveLogs = emptyList(),
@@ -1248,7 +1225,6 @@ class BattleScoreViewModel @Inject constructor(
 
     private fun applyHorseFollowDelta(
         baseDeltaByPlayerId: Map<Int, Int>,
-        actionType: BattleScoreActionType,
         actorId: Int,
         targetIds: List<Int>
     ): Map<Int, Int> {
@@ -1256,62 +1232,86 @@ class BattleScoreViewModel @Inject constructor(
             return emptyMap()
         }
 
-        val mergedDeltaByPlayerId = baseDeltaByPlayerId.toMutableMap()
-        val normalizedTargetIds = targetIds
-            .distinct()
-            .filter { targetId -> targetId != actorId }
-        latestAllPlayers
-            .asSequence()
-            .filter { player ->
-                player.isActive &&
-                    player.playerRole == PlayerRole.HORSE &&
-                    player.boundOnTablePlayerId != null
-            }
-            .forEach { horse ->
-                val boundPlayerId = horse.boundOnTablePlayerId ?: return@forEach
-                when (actionType) {
-                    BattleScoreActionType.HU,
-                    BattleScoreActionType.GANG_DIAN -> {
-                        val targetId = normalizedTargetIds.firstOrNull() ?: return@forEach
-                        val amount = -(baseDeltaByPlayerId[targetId] ?: 0)
-                        if (amount <= 0) return@forEach
-                        when (boundPlayerId) {
-                            actorId -> {
-                                mergedDeltaByPlayerId[horse.id] = (mergedDeltaByPlayerId[horse.id] ?: 0) + amount
-                                mergedDeltaByPlayerId[targetId] = (mergedDeltaByPlayerId[targetId] ?: 0) - amount
-                            }
-
-                            targetId -> {
-                                mergedDeltaByPlayerId[horse.id] = (mergedDeltaByPlayerId[horse.id] ?: 0) - amount
-                                mergedDeltaByPlayerId[actorId] = (mergedDeltaByPlayerId[actorId] ?: 0) + amount
-                            }
-                        }
-                    }
-
-                    BattleScoreActionType.ZIMO,
-                    BattleScoreActionType.GANG_BA,
-                    BattleScoreActionType.GANG_AN -> {
-                        when {
-                            boundPlayerId == actorId -> {
-                                normalizedTargetIds.forEach { targetId ->
-                                    val amount = -(baseDeltaByPlayerId[targetId] ?: 0)
-                                    if (amount <= 0) return@forEach
-                                    mergedDeltaByPlayerId[horse.id] = (mergedDeltaByPlayerId[horse.id] ?: 0) + amount
-                                    mergedDeltaByPlayerId[targetId] = (mergedDeltaByPlayerId[targetId] ?: 0) - amount
-                                }
-                            }
-
-                            boundPlayerId in normalizedTargetIds -> {
-                                val amount = -(baseDeltaByPlayerId[boundPlayerId] ?: 0)
-                                if (amount <= 0) return@forEach
-                                mergedDeltaByPlayerId[horse.id] = (mergedDeltaByPlayerId[horse.id] ?: 0) - amount
-                                mergedDeltaByPlayerId[actorId] = (mergedDeltaByPlayerId[actorId] ?: 0) + amount
-                            }
-                        }
+        val transferEdges = buildBaseTransferEdges(
+            baseDeltaByPlayerId = baseDeltaByPlayerId,
+            actorId = actorId,
+            targetIds = targetIds
+        )
+        if (transferEdges.isEmpty()) {
+            return baseDeltaByPlayerId
+        }
+        val boundHorseIdsByPlayerId = buildBoundHorseIdsByPlayerId()
+        val expandedTransferEdges = buildList {
+            transferEdges.forEach { edge ->
+                val payerIds = listOf(edge.payerId) + boundHorseIdsByPlayerId[edge.payerId].orEmpty()
+                val receiverIds = listOf(edge.receiverId) + boundHorseIdsByPlayerId[edge.receiverId].orEmpty()
+                payerIds.forEach { payerId ->
+                    receiverIds.forEach { receiverId ->
+                        add(
+                            TransferEdge(
+                                payerId = payerId,
+                                receiverId = receiverId,
+                                amount = edge.amount
+                            )
+                        )
                     }
                 }
             }
-        return mergedDeltaByPlayerId
+        }
+        return buildDeltaByPlayerId(expandedTransferEdges)
+    }
+
+    private fun buildBaseTransferEdges(
+        baseDeltaByPlayerId: Map<Int, Int>,
+        actorId: Int,
+        targetIds: List<Int>
+    ): List<TransferEdge> {
+        val normalizedTargetIds = targetIds
+            .distinct()
+            .filter { targetId -> targetId != actorId }
+        return normalizedTargetIds.mapNotNull { targetId ->
+            val amount = -(baseDeltaByPlayerId[targetId] ?: 0)
+            if (amount <= 0) {
+                null
+            } else {
+                TransferEdge(
+                    payerId = targetId,
+                    receiverId = actorId,
+                    amount = amount
+                )
+            }
+        }
+    }
+
+    private fun buildBoundHorseIdsByPlayerId(): Map<Int, List<Int>> {
+        val activeOnTablePlayerIds = latestAllPlayers
+            .asSequence()
+            .filter { player -> player.isActive && player.playerRole == PlayerRole.ON_TABLE }
+            .map { player -> player.id }
+            .toSet()
+        return latestAllPlayers
+            .asSequence()
+            .filter { player -> player.isActive && player.playerRole == PlayerRole.HORSE }
+            .mapNotNull { horse ->
+                val boundPlayerId = horse.boundOnTablePlayerId ?: return@mapNotNull null
+                if (boundPlayerId !in activeOnTablePlayerIds) {
+                    return@mapNotNull null
+                }
+                boundPlayerId to horse.id
+            }
+            .groupBy(
+                keySelector = { (boundPlayerId, _) -> boundPlayerId },
+                valueTransform = { (_, horseId) -> horseId }
+            )
+    }
+
+    private fun buildDeltaByPlayerId(transferEdges: List<TransferEdge>): Map<Int, Int> {
+        val deltaByPlayerId = mutableMapOf<Int, Int>()
+        transferEdges.forEach { edge ->
+            deltaByPlayerId[edge.payerId] = (deltaByPlayerId[edge.payerId] ?: 0) - edge.amount
+            deltaByPlayerId[edge.receiverId] = (deltaByPlayerId[edge.receiverId] ?: 0) + edge.amount
+        }
+        return deltaByPlayerId.filterValues { delta -> delta != 0 }
     }
 
     private fun updateLatestHorseBindingLocally(
@@ -1331,7 +1331,7 @@ class BattleScoreViewModel @Inject constructor(
     }
 
     private fun buildPlayerUiModels(players: List<Player>): List<PlayerCardUiModel> {
-        return players.mapIndexed { index, player ->
+        return players.map { player ->
             val resolvedAvatarKey = PlayerAnimalAvatarCatalog.resolveAvatarKeyOrFallback(
                 avatarKey = player.avatarKey,
                 playerId = player.id,
@@ -1344,7 +1344,7 @@ class BattleScoreViewModel @Inject constructor(
                 avatarEmoji = PlayerAnimalAvatarCatalog.emojiForKey(resolvedAvatarKey),
                 roundDelta = formatDelta(roundDeltaByPlayerId[player.id] ?: 0),
                 totalScore = formatScore(totalScoreByPlayerId[player.id] ?: player.score),
-                isDealer = index == 0,
+                isDealer = player.id == currentDealerPlayerId,
                 status = statusByPlayerId[player.id] ?: PlayerStatus.ACTIVE,
                 winOrder = winOrderByPlayerId[player.id],
                 boundHorseNames = boundHorseNamesByPlayerId[player.id].orEmpty()
@@ -1410,30 +1410,93 @@ class BattleScoreViewModel @Inject constructor(
     }
 
     private fun playerNameOf(playerId: Int): String {
-        return latestPlayers.firstOrNull { it.id == playerId }?.name ?: "P$playerId"
+        return latestAllPlayers.firstOrNull { it.id == playerId }?.name ?: "P$playerId"
     }
 
-    private fun playerNamesOf(playerIds: List<Int>): List<String> {
-        if (playerIds.isEmpty()) return emptyList()
-        val idsInOrder = playerIds.toSet()
-        return latestPlayers
-            .filter { it.id in idsInOrder }
-            .map { it.name }
-    }
-
-    private fun playerNamesOfAny(playerIds: List<Int>): List<String> {
-        if (playerIds.isEmpty()) return emptyList()
-        val allById = latestAllPlayers.associateBy { player -> player.id }
-        return playerIds.distinct().map { playerId ->
-            allById[playerId]?.name ?: "P$playerId"
+    private fun buildScoringLiveLogs(
+        actorId: Int,
+        actionType: LiveLogActionType,
+        fallbackTargetIds: List<Int>,
+        deltaByPlayerId: Map<Int, Int>
+    ): List<LiveLogItemUiModel> {
+        val primaryLog = buildSingleLiveLog(
+            actorId = actorId,
+            actionType = actionType,
+            fallbackTargetIds = fallbackTargetIds,
+            deltaByPlayerId = deltaByPlayerId
+        )
+        val horseLogs = buildHorseLiveLogs(
+            actionType = actionType,
+            deltaByPlayerId = deltaByPlayerId,
+            excludedActorId = actorId
+        )
+        return buildList {
+            primaryLog?.let(::add)
+            addAll(horseLogs)
         }
     }
 
-    private fun scoringRelatedPlayerNames(
+    private fun buildHorseLiveLogs(
+        actionType: LiveLogActionType,
+        deltaByPlayerId: Map<Int, Int>,
+        excludedActorId: Int
+    ): List<LiveLogItemUiModel> {
+        val activeHorses = selectActiveHorses(latestAllPlayers)
+        return activeHorses.mapNotNull { horse ->
+            val horseId = horse.id
+            if (horseId == excludedActorId) {
+                return@mapNotNull null
+            }
+            val horseDelta = deltaByPlayerId[horseId] ?: return@mapNotNull null
+            // 只为收分侧马儿生成独立流水，扣分马儿不单独展示。
+            if (horseDelta <= 0) {
+                return@mapNotNull null
+            }
+            buildSingleLiveLog(
+                actorId = horseId,
+                actionType = actionType,
+                fallbackTargetIds = emptyList(),
+                deltaByPlayerId = deltaByPlayerId,
+                becausePlayerName = horse.boundOnTablePlayerId?.let(::playerNameOf)
+            )
+        }
+    }
+
+    private fun buildSingleLiveLog(
+        actorId: Int,
+        actionType: LiveLogActionType,
+        fallbackTargetIds: List<Int>,
+        deltaByPlayerId: Map<Int, Int>,
+        becausePlayerName: String? = null
+    ): LiveLogItemUiModel? {
+        val actorDelta = deltaByPlayerId[actorId] ?: return null
+        val relatedPlayerDetails = scoringRelatedPlayerDetails(
+            actorId = actorId,
+            fallbackTargetIds = fallbackTargetIds,
+            deltaByPlayerId = deltaByPlayerId
+        )
+        return LiveLogItemUiModel(
+            id = nextLiveLogId++,
+            actorName = playerNameOf(actorId),
+            actorIsHorse = isHorsePlayer(actorId),
+            becausePlayerName = becausePlayerName,
+            actionType = actionType,
+            relatedPlayerNames = relatedPlayerDetails.map { related -> related.name },
+            relatedPlayerDetails = relatedPlayerDetails,
+            amount = formatDelta(actorDelta),
+            highlight = when {
+                actorDelta > 0 -> LiveLogHighlight.POSITIVE
+                actorDelta < 0 -> LiveLogHighlight.NEGATIVE
+                else -> LiveLogHighlight.NEUTRAL
+            }
+        )
+    }
+
+    private fun scoringRelatedPlayerDetails(
         actorId: Int,
         fallbackTargetIds: List<Int>,
         deltaByPlayerId: Map<Int, Int>
-    ): List<String> {
+    ): List<LiveLogRelatedPlayerUiModel> {
         val actorDelta = deltaByPlayerId[actorId] ?: 0
         val relatedIds = when {
             actorDelta > 0 -> deltaByPlayerId
@@ -1448,7 +1511,33 @@ class BattleScoreViewModel @Inject constructor(
 
             else -> fallbackTargetIds.filter { it != actorId }
         }
-        return playerNamesOfAny(relatedIds)
+        val deltaByRelatedId = relatedIds.associateWith { playerId -> deltaByPlayerId[playerId] ?: 0 }
+        return playerNamesWithDeltaById(deltaByRelatedId)
+    }
+
+    private fun playerNamesWithDeltaById(deltaByPlayerId: Map<Int, Int>): List<LiveLogRelatedPlayerUiModel> {
+        if (deltaByPlayerId.isEmpty()) return emptyList()
+        val orderedIds = orderedPlayerIds(deltaByPlayerId.keys)
+        return orderedIds.map { playerId ->
+            LiveLogRelatedPlayerUiModel(
+                name = playerNameOf(playerId),
+                delta = formatDelta(deltaByPlayerId[playerId] ?: 0)
+            )
+        }
+    }
+
+    private fun orderedPlayerIds(playerIds: Collection<Int>): List<Int> {
+        if (playerIds.isEmpty()) return emptyList()
+        val orderByPlayerId = latestAllPlayers
+            .mapIndexed { index, player -> player.id to index }
+            .toMap()
+        return playerIds
+            .distinct()
+            .sortedWith(compareBy<Int> { playerId -> orderByPlayerId[playerId] ?: Int.MAX_VALUE }.thenBy { it })
+    }
+
+    private fun isHorsePlayer(playerId: Int): Boolean {
+        return latestAllPlayers.firstOrNull { player -> player.id == playerId }?.playerRole == PlayerRole.HORSE
     }
 
     private fun huPlayerCount(): Int {
@@ -1462,6 +1551,65 @@ class BattleScoreViewModel @Inject constructor(
 
     private fun isPlayerActive(playerId: Int): Boolean {
         return statusByPlayerId[playerId] == PlayerStatus.ACTIVE
+    }
+
+    private fun canStartActionDraft(actorId: Int, action: BattleAction): Boolean {
+        return when (action) {
+            BattleAction.GANG -> canStartGangDraft(actorId)
+            BattleAction.HU,
+            BattleAction.ZIMO -> isPlayerActive(actorId)
+        }
+    }
+
+    private fun canStartGangDraft(actorId: Int): Boolean {
+        val status = statusByPlayerId[actorId] ?: return false
+        if (status == PlayerStatus.ACTIVE) {
+            return true
+        }
+        if (status != PlayerStatus.HU && status != PlayerStatus.ZIMO) {
+            return false
+        }
+        return actorId == currentWinningPlayerId()
+    }
+
+    private fun canApplyScoringDraft(draft: EventDraftUiState): Boolean {
+        return when (draft.action) {
+            BattleAction.GANG -> canStartGangDraft(draft.actorId)
+            BattleAction.HU,
+            BattleAction.ZIMO -> isPlayerActive(draft.actorId)
+        }
+    }
+
+    private fun actorStatusAfterGang(actorId: Int): PlayerStatus {
+        return when (statusByPlayerId[actorId]) {
+            PlayerStatus.HU -> PlayerStatus.HU
+            PlayerStatus.ZIMO -> PlayerStatus.ZIMO
+            else -> PlayerStatus.ACTIVE
+        }
+    }
+
+    private fun currentWinningPlayerId(): Int? {
+        return statusByPlayerId
+            .filterValues { status -> status == PlayerStatus.HU || status == PlayerStatus.ZIMO }
+            .keys
+            .maxByOrNull { playerId -> winOrderByPlayerId[playerId] ?: Int.MIN_VALUE }
+            ?.takeIf { playerId -> winOrderByPlayerId[playerId] != null }
+    }
+
+    private fun firstWinningPlayerIdOfCurrentRound(): Int? {
+        val activePlayerIds = latestPlayers.map { player -> player.id }.toSet()
+        return winOrderByPlayerId
+            .asSequence()
+            .filter { (playerId, _) -> playerId in activePlayerIds }
+            .minByOrNull { (_, order) -> order }
+            ?.key
+    }
+
+    private fun ensureCurrentDealerPlayerId(players: List<Player>) {
+        val activePlayerIds = players.map { player -> player.id }.toSet()
+        currentDealerPlayerId = currentDealerPlayerId?.takeIf { dealerId ->
+            dealerId in activePlayerIds
+        } ?: players.firstOrNull()?.id
     }
 
     private fun assignWinOrderIfNeeded(playerId: Int, status: PlayerStatus) {
@@ -1518,6 +1666,12 @@ private data class PendingScoringAction(
     val actionType: BattleScoreActionType,
     val actorStatus: PlayerStatus,
     val targetIds: List<Int>
+)
+
+private data class TransferEdge(
+    val payerId: Int,
+    val receiverId: Int,
+    val amount: Int
 )
 
 private fun PendingScoringAction.toLiveLogActionType(): LiveLogActionType {

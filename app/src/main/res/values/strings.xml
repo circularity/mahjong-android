@@ -74,7 +74,11 @@
     <string name="battle_log_subtitle_gang_ba">Ba Gang</string>
     <string name="battle_log_subtitle_gang_an">An Gang</string>
     <string name="battle_log_title_template">%1$s %2$s</string>
+    <string name="battle_log_actor_horse_name_template">%1$s(Horse)</string>
+    <string name="battle_log_because_player_template">because %1$s player</string>
+    <string name="battle_log_title_horse_because_template">%1$s %2$s %3$s</string>
     <string name="battle_log_name_separator">, </string>
+    <string name="battle_log_related_player_delta_template">%1$s %2$s</string>
     <string name="battle_log_related_none">No related players</string>
     <string name="battle_log_related_hu_template">Discarder: %1$s</string>
     <string name="battle_log_related_zimo_template">Paying players: %1$s</string>
@@ -122,6 +126,7 @@
     <string name="battle_draft_multiplier_dialog_title">Select Fan (%1$d-%2$d fan)</string>
     <string name="battle_draft_multiplier_dialog_subtitle">Confirm fan for this event</string>
     <string name="battle_draft_multiplier_unit">Fan</string>
+    <string name="battle_fan_zero_label">Small Hu</string>
     <string name="battle_draft_confirm_score">Confirm Score</string>
 
     <string name="battle_settlement_title">Round Settlement</string>
@@ -139,16 +144,16 @@
     <string name="battle_draw_placeholder_message">Draw settlement flow is not implemented yet.</string>
     <string name="battle_draw_placeholder_action">Got it</string>
     <string name="battle_draw_progress">Pending player %1$d/%2$d</string>
-    <string name="battle_draw_choose_ting_title">%1$s: choose ting status</string>
+    <string name="battle_draw_choose_ting_title">%1$s: choose xiajiao status</string>
     <string name="battle_draw_choose_ting_subtitle">%1$s</string>
     <string name="battle_draw_current_score">Current total: %1$s</string>
-    <string name="battle_draw_choice_ting">Ting</string>
-    <string name="battle_draw_choice_ting_desc">Select ting score. Non-ting players will pay you.</string>
-    <string name="battle_draw_choice_no_ting">No Ting</string>
-    <string name="battle_draw_choice_no_ting_desc">No ting payout for this round.</string>
+    <string name="battle_draw_choice_ting">Xiajiao</string>
+    <string name="battle_draw_choice_ting_desc">Select xiajiao score. Non-xiajiao players will pay you.</string>
+    <string name="battle_draw_choice_no_ting">Not Xiajiao</string>
+    <string name="battle_draw_choice_no_ting_desc">No xiajiao payout for this round.</string>
     <string name="battle_draw_choose_score_title">%1$s: Select Fan</string>
     <string name="battle_draw_choose_score_subtitle">%1$s</string>
-    <string name="battle_draw_score_formula_hint">Ting score = base point × fan (%1$d-%2$d)</string>
+    <string name="battle_draw_score_formula_hint">Xiajiao score = base point × fan (%1$d-%2$d)</string>
 
     <string name="players_page_title">Players</string>
     <string name="players_add_title">Add New Player</string>
@@ -156,10 +161,12 @@
     <string name="players_active_count">Active Players (%1$d)</string>
     <string name="players_active_section">Active Players</string>
     <string name="players_inactive_section">Inactive Players (%1$d)</string>
-    <string name="players_status_active">Active</string>
-    <string name="players_status_inactive">Inactive</string>
+    <string name="players_status_active">Online</string>
+    <string name="players_status_inactive">Offline</string>
     <string name="players_role_on_table">On Table</string>
     <string name="players_role_horse">Horse</string>
+    <string name="players_role_action_join_table">Join Table</string>
+    <string name="players_role_action_rest">Take Break</string>
     <string name="players_points_unit">PTS</string>
     <string name="players_win_rate">Win %1$d%%</string>
     <string name="players_total_games">Games %1$d</string>

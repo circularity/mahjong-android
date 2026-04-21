@@ -292,7 +292,10 @@ private fun TargetDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 targets.forEach { player ->
-                    StitchTargetPlayerCard(player = player, onClick = { onSelect(player.id) })
+                    StitchTargetPlayerCard(
+                        player = player,
+                        onClick = { onSelect(player.id) }
+                    )
                 }
             }
         }
@@ -388,6 +391,12 @@ private fun MultiplierOptionCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val showFanUnit = displayFan != 0
+    val displayFanLabel = if (displayFan == 0) {
+        stringResource(R.string.battle_fan_zero_label)
+    } else {
+        displayFan.toString()
+    }
     val cardShape = RoundedCornerShape(22.dp)
     Surface(
         shape = cardShape,
@@ -416,19 +425,21 @@ private fun MultiplierOptionCard(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = displayFan.toString(),
+                text = displayFanLabel,
                 style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.ExtraBold,
                 color = if (isSelected) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.onSurface
             )
-            Text(
-                text = stringResource(R.string.battle_draft_multiplier_unit),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                color = if (isSelected) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            if (showFanUnit) {
+                Text(
+                    text = stringResource(R.string.battle_draft_multiplier_unit),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isSelected) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }

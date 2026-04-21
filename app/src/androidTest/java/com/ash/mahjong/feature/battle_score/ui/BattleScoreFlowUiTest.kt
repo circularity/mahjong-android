@@ -2,6 +2,7 @@ package com.ash.mahjong.feature.battle_score.ui
 
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -97,7 +98,11 @@ class BattleScoreFlowUiTest {
         composeRule.setContent {
             MahjongTheme {
                 BattleScoreScreen(
-                    uiState = baseState(requiresPlayerSetup = true, canSettle = false),
+                    uiState = baseState(
+                        isPlayersLoaded = true,
+                        requiresPlayerSetup = true,
+                        canSettle = false
+                    ),
                     onIntent = {},
                     onGoToPlayers = {}
                 )
@@ -107,6 +112,29 @@ class BattleScoreFlowUiTest {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         composeRule.onNodeWithText(context.getString(R.string.battle_setup_title)).assertIsDisplayed()
         composeRule.onNodeWithText(context.getString(R.string.battle_setup_action)).assertIsDisplayed()
+    }
+
+    @Test
+    fun requiresSetup_beforePlayersLoaded_showsSkeletonAndHidesGuideCard() {
+        composeRule.setContent {
+            MahjongTheme {
+                BattleScoreScreen(
+                    uiState = baseState(
+                        isPlayersLoaded = false,
+                        requiresPlayerSetup = true,
+                        canSettle = false
+                    ),
+                    onIntent = {},
+                    onGoToPlayers = {}
+                )
+            }
+        }
+
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        composeRule.onNodeWithTag(BattleScoreTestTags.LOADING_SKELETON).assertIsDisplayed()
+        composeRule.onAllNodesWithText(context.getString(R.string.battle_setup_title)).assertCountEquals(0)
+        composeRule.onAllNodesWithText(context.getString(R.string.battle_setup_action)).assertCountEquals(0)
+        composeRule.onAllNodesWithTag(BattleScoreTestTags.PLAYERS_GRID).assertCountEquals(0)
     }
 
     @Test
@@ -249,7 +277,7 @@ class BattleScoreFlowUiTest {
     }
 
     @Test
-    fun horsesExist_showsHorseSectionBetweenPlayersAndLiveLog() {
+    fun horsesExist_showsHorseSectionBelowTopBar_andAboveScrollableContent() {
         val state = baseState(
             horses = listOf(
                 HorseUiModel(
@@ -273,12 +301,14 @@ class BattleScoreFlowUiTest {
             }
         }
 
+        val topBarBounds = composeRule.onNodeWithTag(BattleScoreTestTags.TOP_BAR).fetchSemanticsNode().boundsInRoot
         val playersBounds = composeRule.onNodeWithTag(BattleScoreTestTags.PLAYERS_GRID).fetchSemanticsNode().boundsInRoot
         val horsesBounds = composeRule.onNodeWithTag(BattleScoreTestTags.HORSE_SECTION).fetchSemanticsNode().boundsInRoot
         val liveLogBounds = composeRule.onNodeWithTag(BattleScoreTestTags.LIVE_LOG_SECTION).fetchSemanticsNode().boundsInRoot
 
-        assertTrue(horsesBounds.top > playersBounds.top)
-        assertTrue(liveLogBounds.top > horsesBounds.top)
+        assertTrue(horsesBounds.top >= topBarBounds.bottom)
+        assertTrue(playersBounds.top >= horsesBounds.bottom)
+        assertTrue(liveLogBounds.top > playersBounds.top)
     }
 
     @Test
@@ -422,6 +452,53 @@ class BattleScoreFlowUiTest {
     }
 
     @Test
+    fun swapPlayersButton_clickDispatchesOpenDialogIntent_whenEnabled() {
+        val intents = mutableListOf<BattleScoreIntent>()
+        val state = baseState(
+            horses = listOf(
+                HorseUiModel(
+                    id = 6,
+                    name = "马儿A",
+                    avatarKey = "horse_6",
+                    avatarEmoji = "H6",
+                    boundOnTablePlayerName = null,
+                    roundDelta = "+0",
+                    totalScore = "100"
+                )
+            )
+        )
+        composeRule.setContent {
+            MahjongTheme {
+                BattleScoreScreen(
+                    uiState = state,
+                    onIntent = { intents.add(it) },
+                    onGoToPlayers = {}
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag(BattleScoreTestTags.SWAP_PLAYERS_BUTTON).performClick()
+        assertTrue(intents.contains(BattleScoreIntent.OpenPlayerSwapDialog))
+    }
+
+    @Test
+    fun swapPlayersButton_isDisabledButVisible_whenCannotSwap() {
+        composeRule.setContent {
+            MahjongTheme {
+                BattleScoreScreen(
+                    uiState = baseState(horses = emptyList()),
+                    onIntent = {},
+                    onGoToPlayers = {}
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag(BattleScoreTestTags.SWAP_PLAYERS_BUTTON)
+            .assertIsDisplayed()
+            .assertIsNotEnabled()
+    }
+
+    @Test
     fun activePlayer_doesNotShowWinOrderBadge() {
         val state = baseState().copy(
             players = baseState().players.map { player ->
@@ -442,7 +519,101 @@ class BattleScoreFlowUiTest {
         composeRule.onAllNodesWithTag(BattleScoreTestTags.winOrderBadge(3)).assertCountEquals(0)
     }
 
+    @Test
+    fun huPlayer_gangButtonStillEnabled_dispatchesGangIntent() {
+        val intents = mutableListOf<BattleScoreIntent>()
+        composeRule.setContent {
+            MahjongTheme {
+                BattleScoreScreen(
+                    uiState = baseState(),
+                    onIntent = { intents.add(it) },
+                    onGoToPlayers = {}
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag(BattleScoreTestTags.gangButton(3)).performClick()
+        assertTrue(
+            intents.contains(
+                BattleScoreIntent.SelectAction(
+                    actorId = 3,
+                    action = BattleAction.GANG
+                )
+            )
+        )
+    }
+
+    @Test
+    fun multipleHuOrZimo_onlyLatestWinnerGangButtonEnabled() {
+        val intents = mutableListOf<BattleScoreIntent>()
+        val state = baseState().copy(
+            players = baseState().players.map { player ->
+                when (player.id) {
+                    1 -> player.copy(status = PlayerStatus.HU, winOrder = 1)
+                    3 -> player.copy(status = PlayerStatus.ZIMO, winOrder = 2)
+                    else -> player.copy(status = PlayerStatus.ACTIVE, winOrder = null)
+                }
+            }
+        )
+
+        composeRule.setContent {
+            MahjongTheme {
+                BattleScoreScreen(
+                    uiState = state,
+                    onIntent = { intents.add(it) },
+                    onGoToPlayers = {}
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag(BattleScoreTestTags.gangButton(1)).assertIsNotEnabled()
+        composeRule.onNodeWithTag(BattleScoreTestTags.gangButton(3)).performClick()
+        assertTrue(
+            intents.contains(
+                BattleScoreIntent.SelectAction(
+                    actorId = 3,
+                    action = BattleAction.GANG
+                )
+            )
+        )
+    }
+
+    @Test
+    fun activePlayer_gangButtonRemainsEnabled_withMultipleHuOrZimoPlayers() {
+        val intents = mutableListOf<BattleScoreIntent>()
+        val state = baseState().copy(
+            players = baseState().players.map { player ->
+                when (player.id) {
+                    1 -> player.copy(status = PlayerStatus.HU, winOrder = 1)
+                    3 -> player.copy(status = PlayerStatus.ZIMO, winOrder = 2)
+                    else -> player.copy(status = PlayerStatus.ACTIVE, winOrder = null)
+                }
+            }
+        )
+
+        composeRule.setContent {
+            MahjongTheme {
+                BattleScoreScreen(
+                    uiState = state,
+                    onIntent = { intents.add(it) },
+                    onGoToPlayers = {}
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag(BattleScoreTestTags.gangButton(2)).performClick()
+        assertTrue(
+            intents.contains(
+                BattleScoreIntent.SelectAction(
+                    actorId = 2,
+                    action = BattleAction.GANG
+                )
+            )
+        )
+    }
+
     private fun baseState(
+        isPlayersLoaded: Boolean = true,
         requiresPlayerSetup: Boolean = false,
         canSettle: Boolean = true,
         eventDraft: EventDraftUiState? = null,
@@ -455,6 +626,7 @@ class BattleScoreFlowUiTest {
         return BattleScoreUiState(
             currentRound = 1,
             windLabelRes = R.string.battle_wind_east,
+            isPlayersLoaded = isPlayersLoaded,
             players = listOf(
                 PlayerCardUiModel(
                     id = 1,

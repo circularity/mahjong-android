@@ -16,6 +16,8 @@ object BattleScoreTestTags {
     const val DRAW_TING_CHOICE_DIALOG = "battle_draw_ting_choice_dialog"
     const val DRAW_MULTIPLIER_DIALOG = "battle_draw_multiplier_dialog"
     const val RESET_CONFIRM_DIALOG = "battle_reset_confirm_dialog"
+    const val SWAP_PLAYERS_BUTTON = "battle_swap_players_button"
+    const val LOADING_SKELETON = "battle_loading_skeleton"
     private const val BOTTOM_TAB_ICON_PREFIX = "battle_bottom_tab_icon_"
     private const val MULTIPLIER_OPTION_PREFIX = "battle_multiplier_option_"
     private const val DRAW_MULTIPLIER_OPTION_PREFIX = "battle_draw_multiplier_option_"

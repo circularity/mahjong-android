@@ -7,6 +7,7 @@ import com.ash.mahjong.feature.battle_score.intent.GangType
 data class BattleScoreUiState(
     val currentRound: Int,
     @param:StringRes val windLabelRes: Int,
+    val isPlayersLoaded: Boolean,
     val players: List<PlayerCardUiModel>,
     val horses: List<HorseUiModel> = emptyList(),
     val horseBindingDraft: HorseBindingDraftUiState? = null,

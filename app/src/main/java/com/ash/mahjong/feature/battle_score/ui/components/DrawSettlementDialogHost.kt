@@ -3,6 +3,7 @@ package com.ash.mahjong.feature.battle_score.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -23,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -36,6 +39,7 @@ import com.ash.mahjong.feature.battle_score.state.DrawSettlementDraftUiState
 import com.ash.mahjong.feature.battle_score.state.DrawSettlementStep
 import com.ash.mahjong.feature.battle_score.state.PlayerCardUiModel
 import com.ash.mahjong.feature.battle_score.ui.BattleScoreTestTags
+import com.ash.mahjong.ui.avatar.PlayerAvatarVisual
 
 @Composable
 fun DrawSettlementDialogHost(
@@ -56,6 +60,8 @@ fun DrawSettlementDialogHost(
         DrawSettlementStep.CHOOSE_TING -> {
             DrawTingChoiceDialog(
                 playerName = currentPlayer.name,
+                avatarKey = currentPlayer.avatarKey,
+                avatarEmoji = currentPlayer.avatarEmoji,
                 totalScore = currentPlayer.totalScore,
                 progress = progress,
                 selectedTingChoice = draft.currentTingChoice,
@@ -71,6 +77,8 @@ fun DrawSettlementDialogHost(
         DrawSettlementStep.CHOOSE_MULTIPLIER -> {
             DrawMultiplierChoiceDialog(
                 playerName = currentPlayer.name,
+                avatarKey = currentPlayer.avatarKey,
+                avatarEmoji = currentPlayer.avatarEmoji,
                 progress = progress,
                 range = multiplierRange,
                 selected = draft.currentMultiplier,
@@ -86,6 +94,8 @@ fun DrawSettlementDialogHost(
 @Composable
 private fun DrawTingChoiceDialog(
     playerName: String,
+    avatarKey: String,
+    avatarEmoji: String,
     totalScore: String,
     progress: String,
     selectedTingChoice: Boolean?,
@@ -103,6 +113,11 @@ private fun DrawTingChoiceDialog(
         DialogTitle(
             title = stringResource(R.string.battle_draw_choose_ting_title, playerName),
             subtitle = stringResource(R.string.battle_draw_choose_ting_subtitle, progress)
+        )
+        DrawCurrentPlayerHeader(
+            playerName = playerName,
+            avatarKey = avatarKey,
+            avatarEmoji = avatarEmoji
         )
         Text(
             text = stringResource(R.string.battle_draw_current_score, totalScore),
@@ -134,6 +149,8 @@ private fun DrawTingChoiceDialog(
 @Composable
 private fun DrawMultiplierChoiceDialog(
     playerName: String,
+    avatarKey: String,
+    avatarEmoji: String,
     progress: String,
     range: IntRange,
     selected: Int?,
@@ -153,6 +170,11 @@ private fun DrawMultiplierChoiceDialog(
         DialogTitle(
             title = stringResource(R.string.battle_draw_choose_score_title, playerName),
             subtitle = stringResource(R.string.battle_draw_choose_score_subtitle, progress)
+        )
+        DrawCurrentPlayerHeader(
+            playerName = playerName,
+            avatarKey = avatarKey,
+            avatarEmoji = avatarEmoji
         )
         Text(
             text = stringResource(
@@ -260,6 +282,46 @@ private fun DialogTitle(title: String, subtitle: String) {
 }
 
 @Composable
+private fun DrawCurrentPlayerHeader(
+    playerName: String,
+    avatarKey: String,
+    avatarEmoji: String
+) {
+    val avatarContentDescription = stringResource(R.string.player_avatar_content_desc)
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(30.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentAlignment = Alignment.Center
+            ) {
+                PlayerAvatarVisual(
+                    avatarKey = avatarKey,
+                    avatarEmoji = avatarEmoji,
+                    fallbackText = playerName.take(1),
+                    contentDescription = avatarContentDescription,
+                    textStyle = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                )
+            }
+            Text(
+                text = playerName,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
+}
+
+@Composable
 private fun DrawChoiceCard(
     title: String,
     subtitle: String,
@@ -306,6 +368,12 @@ private fun DrawMultiplierCard(
     modifier: Modifier,
     onClick: () -> Unit
 ) {
+    val showFanUnit = displayFan != 0
+    val displayFanLabel = if (displayFan == 0) {
+        stringResource(R.string.battle_fan_zero_label)
+    } else {
+        displayFan.toString()
+    }
     val shape = RoundedCornerShape(16.dp)
     Surface(
         shape = shape,
@@ -326,16 +394,18 @@ private fun DrawMultiplierCard(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = displayFan.toString(),
+                text = displayFanLabel,
                 style = MaterialTheme.typography.titleLarge,
                 color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.ExtraBold
             )
-            Text(
-                text = stringResource(R.string.battle_draft_multiplier_unit),
-                style = MaterialTheme.typography.labelSmall,
-                color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            if (showFanUnit) {
+                Text(
+                    text = stringResource(R.string.battle_draft_multiplier_unit),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }

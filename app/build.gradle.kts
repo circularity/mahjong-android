@@ -26,7 +26,7 @@ android {
         applicationId = "com.ash.mahjong"
         minSdk = 28
         targetSdk = 36
-        versionCode = 1
+        versionCode = 2
         versionName = "1.0.0"
         ndk {
             abiFilters += setOf("arm64-v8a", "armeabi-v7a")

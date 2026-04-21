@@ -19,8 +19,16 @@ enum class LiveLogActionType {
 data class LiveLogItemUiModel(
     val id: Int,
     val actorName: String,
+    val actorIsHorse: Boolean = false,
+    val becausePlayerName: String? = null,
     val actionType: LiveLogActionType,
     val relatedPlayerNames: List<String>,
+    val relatedPlayerDetails: List<LiveLogRelatedPlayerUiModel> = emptyList(),
     val amount: String,
     val highlight: LiveLogHighlight
+)
+
+data class LiveLogRelatedPlayerUiModel(
+    val name: String,
+    val delta: String
 )

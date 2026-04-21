@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -50,6 +51,13 @@ fun PlayersGrid(
     modifier: Modifier = Modifier
 ) {
     val spacing = MahjongDesign.spacing
+    val currentWinningPlayerId = players
+        .filter { player ->
+            (player.status == PlayerStatus.HU || player.status == PlayerStatus.ZIMO) &&
+                player.winOrder != null
+        }
+        .maxByOrNull { player -> player.winOrder ?: Int.MIN_VALUE }
+        ?.id
 
     Column(
         modifier = modifier,
@@ -61,7 +69,8 @@ fun PlayersGrid(
                 onHuClick = onHuClick,
                 onGangClick = onGangClick,
                 onZimoClick = onZimoClick,
-                actionsEnabled = actionsEnabled
+                actionsEnabled = actionsEnabled,
+                isCurrentWinningPlayer = player.id == currentWinningPlayerId
             )
         }
     }
@@ -74,10 +83,13 @@ private fun PlayerCard(
     onGangClick: (Int) -> Unit,
     onZimoClick: (Int) -> Unit,
     actionsEnabled: Boolean,
+    isCurrentWinningPlayer: Boolean,
     modifier: Modifier = Modifier
 ) {
     val spacing = MahjongDesign.spacing
-    val isActionEnabled = actionsEnabled && player.status == PlayerStatus.ACTIVE
+    val canGang = actionsEnabled &&
+        (player.status == PlayerStatus.ACTIVE || isCurrentWinningPlayer)
+    val canHuOrZimo = actionsEnabled && player.status == PlayerStatus.ACTIVE
     val showStatusStamp = player.status == PlayerStatus.HU || player.status == PlayerStatus.ZIMO
     val showLockedOverlay = player.status == PlayerStatus.LOCKED
     val showWinOrderBadge = player.winOrder != null &&
@@ -228,9 +240,13 @@ private fun PlayerCard(
                         PlayerActionButton(
                             text = stringResource(R.string.battle_action_gang),
                             onClick = { onGangClick(player.id) },
-                            enabled = isActionEnabled,
+                            enabled = canGang,
                             containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                            contentColor = MaterialTheme.colorScheme.onSurface,
+                            contentColor = if (canGang) {
+                                MaterialTheme.colorScheme.onSurface
+                            } else {
+                                Color.White
+                            },
                             modifier = Modifier
                                 .weight(1f)
                                 .testTag(BattleScoreTestTags.gangButton(player.id))
@@ -238,7 +254,7 @@ private fun PlayerCard(
                         PlayerActionButton(
                             text = stringResource(R.string.battle_action_hu),
                             onClick = { onHuClick(player.id) },
-                            enabled = isActionEnabled,
+                            enabled = canHuOrZimo,
                             containerColor = MaterialTheme.colorScheme.error,
                             contentColor = MaterialTheme.colorScheme.onError,
                             modifier = Modifier
@@ -248,7 +264,7 @@ private fun PlayerCard(
                         PlayerActionButton(
                             text = stringResource(R.string.battle_action_zimo),
                             onClick = { onZimoClick(player.id) },
-                            enabled = isActionEnabled,
+                            enabled = canHuOrZimo,
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.surface,
                             modifier = Modifier

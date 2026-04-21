@@ -1,6 +1,8 @@
 package com.ash.mahjong.feature.battle_score.vm
 
+import com.ash.mahjong.data.player.AddPlayerResult
 import com.ash.mahjong.data.player.Player
+import com.ash.mahjong.data.player.PlayerRepository
 import com.ash.mahjong.data.player.PlayerRole
 import com.ash.mahjong.data.settings.GameSettings
 import com.ash.mahjong.feature.battle_score.intent.BattleAction
@@ -17,6 +19,8 @@ import com.ash.mahjong.test.fake.FakeBattleRecordRepository
 import com.ash.mahjong.test.fake.FakePlayerRepository
 import com.ash.mahjong.test.rules.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertFalse
@@ -34,6 +38,24 @@ class BattleScoreViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     @Test
+    fun initialState_beforePlayersLoaded_hidesSetupPromptByLoadingGate() = runTest {
+        val repository = DeferredPlayerRepository()
+        val viewModel = BattleScoreViewModel(
+            playerRepository = repository,
+            gameSettingsRepository = FakeGameSettingsRepository()
+        )
+
+        assertFalse(viewModel.uiState.value.isPlayersLoaded)
+
+        repository.emitPlayers(fivePlayers())
+        advanceUntilIdle()
+        val loadedState = viewModel.uiState.value
+        assertTrue(loadedState.isPlayersLoaded)
+        assertFalse(loadedState.requiresPlayerSetup)
+        assertEquals(4, loadedState.players.size)
+    }
+
+    @Test
     fun initialState_observesActivePlayers_oldestFirstAndRequiresFourPlayers() = runTest {
         val repository = FakePlayerRepository(initialPlayers = fivePlayers())
         val viewModel = BattleScoreViewModel(
@@ -46,6 +68,7 @@ class BattleScoreViewModelTest {
         assertEquals(4, state.players.size)
         assertEquals(listOf(1, 2, 3, 4), state.players.map { it.id })
         assertTrue(state.players.first().isDealer)
+        assertTrue(state.isPlayersLoaded)
         assertEquals(false, state.requiresPlayerSetup)
         assertEquals(1..8, state.multiplierRange)
     }
@@ -229,7 +252,7 @@ class BattleScoreViewModelTest {
         advanceUntilIdle()
 
         val state = viewModel.uiState.value
-        assertFalse(state.playerSwapDialogVisible)
+        assertTrue(state.playerSwapDialogVisible)
         assertEquals(4, state.players.size)
         assertEquals(listOf(2, 3, 4, 6), state.players.map { it.id })
         assertEquals(listOf(1), state.horses.map { it.id })
@@ -304,6 +327,122 @@ class BattleScoreViewModelTest {
     }
 
     @Test
+    fun hu_whenBothSidesHaveHorse_playerAndHorseStayInSync() = runTest {
+        val viewModel = BattleScoreViewModel(
+            playerRepository = FakePlayerRepository(initialPlayers = playersWithBothSideHorseBinding()),
+            gameSettingsRepository = FakeGameSettingsRepository()
+        )
+        advanceUntilIdle()
+
+        hu(viewModel, actorId = 1, targetId = 2)
+        advanceUntilIdle()
+
+        val players = viewModel.uiState.value.players.associateBy { it.id }
+        val horses = viewModel.uiState.value.horses.associateBy { it.id }
+        assertEquals("102", players.getValue(1).totalScore)
+        assertEquals("98", players.getValue(2).totalScore)
+        assertEquals("102", horses.getValue(5).totalScore)
+        assertEquals("98", horses.getValue(6).totalScore)
+        assertEquals(players.getValue(1).roundDelta, horses.getValue(5).roundDelta)
+        assertEquals(players.getValue(2).roundDelta, horses.getValue(6).roundDelta)
+    }
+
+    @Test
+    fun gangDian_whenBothSidesHaveHorse_playerAndHorseStayInSync() = runTest {
+        val viewModel = BattleScoreViewModel(
+            playerRepository = FakePlayerRepository(initialPlayers = playersWithBothSideHorseBinding()),
+            gameSettingsRepository = FakeGameSettingsRepository()
+        )
+        advanceUntilIdle()
+
+        viewModel.onIntent(BattleScoreIntent.SelectAction(actorId = 1, action = BattleAction.GANG))
+        viewModel.onIntent(BattleScoreIntent.SelectGangType(GangType.DIAN))
+        viewModel.onIntent(BattleScoreIntent.ConfirmDraftStep)
+        viewModel.onIntent(BattleScoreIntent.SelectTarget(targetId = 2))
+        advanceUntilIdle()
+
+        val players = viewModel.uiState.value.players.associateBy { it.id }
+        val horses = viewModel.uiState.value.horses.associateBy { it.id }
+        assertEquals("104", players.getValue(1).totalScore)
+        assertEquals("96", players.getValue(2).totalScore)
+        assertEquals("104", horses.getValue(5).totalScore)
+        assertEquals("96", horses.getValue(6).totalScore)
+        assertEquals(players.getValue(1).roundDelta, horses.getValue(5).roundDelta)
+        assertEquals(players.getValue(2).roundDelta, horses.getValue(6).roundDelta)
+    }
+
+    @Test
+    fun zimo_whenActorAndTargetHaveHorse_includesOtherHorseImpactAndKeepsSync() = runTest {
+        val viewModel = BattleScoreViewModel(
+            playerRepository = FakePlayerRepository(initialPlayers = playersWithBothSideHorseBinding()),
+            gameSettingsRepository = FakeGameSettingsRepository()
+        )
+        advanceUntilIdle()
+
+        viewModel.onIntent(BattleScoreIntent.SelectAction(actorId = 1, action = BattleAction.ZIMO))
+        viewModel.onIntent(BattleScoreIntent.SelectMultiplier(multiplier = 1))
+        viewModel.onIntent(BattleScoreIntent.ConfirmEvent)
+        advanceUntilIdle()
+
+        val players = viewModel.uiState.value.players.associateBy { it.id }
+        val horses = viewModel.uiState.value.horses.associateBy { it.id }
+        assertEquals("104", players.getValue(1).totalScore)
+        assertEquals("98", players.getValue(2).totalScore)
+        assertEquals("98", players.getValue(3).totalScore)
+        assertEquals("98", players.getValue(4).totalScore)
+        assertEquals("104", horses.getValue(5).totalScore)
+        assertEquals("98", horses.getValue(6).totalScore)
+        assertEquals(players.getValue(1).roundDelta, horses.getValue(5).roundDelta)
+        assertEquals(players.getValue(2).roundDelta, horses.getValue(6).roundDelta)
+    }
+
+    @Test
+    fun gangAn_whenActorAndTargetHaveHorse_includesOtherHorseImpactAndKeepsSync() = runTest {
+        val viewModel = BattleScoreViewModel(
+            playerRepository = FakePlayerRepository(initialPlayers = playersWithBothSideHorseBinding()),
+            gameSettingsRepository = FakeGameSettingsRepository()
+        )
+        advanceUntilIdle()
+
+        viewModel.onIntent(BattleScoreIntent.SelectAction(actorId = 1, action = BattleAction.GANG))
+        viewModel.onIntent(BattleScoreIntent.SelectGangType(GangType.AN))
+        viewModel.onIntent(BattleScoreIntent.ConfirmDraftStep)
+        advanceUntilIdle()
+
+        val players = viewModel.uiState.value.players.associateBy { it.id }
+        val horses = viewModel.uiState.value.horses.associateBy { it.id }
+        assertEquals("108", players.getValue(1).totalScore)
+        assertEquals("96", players.getValue(2).totalScore)
+        assertEquals("96", players.getValue(3).totalScore)
+        assertEquals("96", players.getValue(4).totalScore)
+        assertEquals("108", horses.getValue(5).totalScore)
+        assertEquals("96", horses.getValue(6).totalScore)
+        assertEquals(players.getValue(1).roundDelta, horses.getValue(5).roundDelta)
+        assertEquals(players.getValue(2).roundDelta, horses.getValue(6).roundDelta)
+    }
+
+    @Test
+    fun hu_withMultipleHorsesBoundToWinner_eachHorseMatchesWinnerDelta() = runTest {
+        val viewModel = BattleScoreViewModel(
+            playerRepository = FakePlayerRepository(initialPlayers = playersWithMultipleHorsesBoundToWinner()),
+            gameSettingsRepository = FakeGameSettingsRepository()
+        )
+        advanceUntilIdle()
+
+        hu(viewModel, actorId = 1, targetId = 2)
+        advanceUntilIdle()
+
+        val players = viewModel.uiState.value.players.associateBy { it.id }
+        val horses = viewModel.uiState.value.horses.associateBy { it.id }
+        assertEquals("101", players.getValue(1).totalScore)
+        assertEquals("97", players.getValue(2).totalScore)
+        assertEquals("101", horses.getValue(5).totalScore)
+        assertEquals("101", horses.getValue(6).totalScore)
+        assertEquals(players.getValue(1).roundDelta, horses.getValue(5).roundDelta)
+        assertEquals(players.getValue(1).roundDelta, horses.getValue(6).roundDelta)
+    }
+
+    @Test
     fun liveLog_relatedPlayers_includesHorseWhenHorseActuallyPays() = runTest {
         val viewModel = BattleScoreViewModel(
             playerRepository = FakePlayerRepository(initialPlayers = playersWithHorseBoundToTarget()),
@@ -319,6 +458,48 @@ class BattleScoreViewModelTest {
         assertEquals("+2", latestLog.amount)
         assertTrue(latestLog.relatedPlayerNames.contains("B"))
         assertTrue(latestLog.relatedPlayerNames.contains("E"))
+        assertEquals(
+            setOf("B:-1", "E:-1"),
+            latestLog.relatedPlayerDetails
+                .map { detail -> "${detail.name}:${detail.delta}" }
+                .toSet()
+        )
+    }
+
+    @Test
+    fun liveLog_whenHorseIsPayer_doesNotCreateHorseSpecificRecord() = runTest {
+        val viewModel = BattleScoreViewModel(
+            playerRepository = FakePlayerRepository(initialPlayers = playersWithHorseBoundToTarget()),
+            gameSettingsRepository = FakeGameSettingsRepository()
+        )
+        advanceUntilIdle()
+
+        hu(viewModel, actorId = 1, targetId = 2)
+        advanceUntilIdle()
+
+        val horseLog = viewModel.uiState.value.liveLogs.firstOrNull { log -> log.actorName == "E" }
+        assertNull(horseLog)
+    }
+
+    @Test
+    fun liveLog_whenHorseIsCollector_createsHorseSpecificRecord() = runTest {
+        val viewModel = BattleScoreViewModel(
+            playerRepository = FakePlayerRepository(initialPlayers = playersWithBothSideHorseBinding()),
+            gameSettingsRepository = FakeGameSettingsRepository()
+        )
+        advanceUntilIdle()
+
+        viewModel.onIntent(BattleScoreIntent.SelectAction(actorId = 1, action = BattleAction.ZIMO))
+        viewModel.onIntent(BattleScoreIntent.SelectMultiplier(multiplier = 1))
+        viewModel.onIntent(BattleScoreIntent.ConfirmEvent)
+        advanceUntilIdle()
+
+        val liveLogs = viewModel.uiState.value.liveLogs
+        assertEquals(2, liveLogs.size)
+        assertEquals("A", liveLogs[0].actorName)
+        assertEquals("E", liveLogs[1].actorName)
+        assertEquals("+4", liveLogs[1].amount)
+        assertNull(liveLogs.firstOrNull { log -> log.actorName == "F" })
     }
 
     @Test
@@ -555,6 +736,116 @@ class BattleScoreViewModelTest {
             LiveLogActionType.GANG_DIAN,
             viewModel.uiState.value.liveLogs.first().actionType
         )
+    }
+
+    @Test
+    fun huPlayer_gangBa_confirmType_settlesImmediatelyWithActiveOpponents() = runTest {
+        val viewModel = BattleScoreViewModel(
+            playerRepository = FakePlayerRepository(initialPlayers = fourPlayers()),
+            gameSettingsRepository = FakeGameSettingsRepository()
+        )
+        advanceUntilIdle()
+
+        hu(viewModel, actorId = 1, targetId = 2)
+        advanceUntilIdle()
+
+        viewModel.onIntent(BattleScoreIntent.SelectAction(actorId = 1, action = BattleAction.GANG))
+        viewModel.onIntent(BattleScoreIntent.SelectGangType(GangType.BA))
+        viewModel.onIntent(BattleScoreIntent.ConfirmDraftStep)
+        advanceUntilIdle()
+
+        val players = viewModel.uiState.value.players.associateBy { it.id }
+        assertEquals("104", players.getValue(1).totalScore)
+        assertEquals("98", players.getValue(2).totalScore)
+        assertEquals("99", players.getValue(3).totalScore)
+        assertEquals("99", players.getValue(4).totalScore)
+        assertEquals(PlayerStatus.HU, players.getValue(1).status)
+        assertNull(viewModel.uiState.value.eventDraft)
+        assertEquals(
+            LiveLogActionType.GANG_BA,
+            viewModel.uiState.value.liveLogs.first().actionType
+        )
+    }
+
+    @Test
+    fun zimoPlayer_gangDian_selectTarget_settlesImmediately() = runTest {
+        val viewModel = BattleScoreViewModel(
+            playerRepository = FakePlayerRepository(initialPlayers = fourPlayers()),
+            gameSettingsRepository = FakeGameSettingsRepository()
+        )
+        advanceUntilIdle()
+
+        viewModel.onIntent(BattleScoreIntent.SelectAction(actorId = 1, action = BattleAction.ZIMO))
+        viewModel.onIntent(BattleScoreIntent.SelectMultiplier(multiplier = 1))
+        viewModel.onIntent(BattleScoreIntent.ConfirmEvent)
+        advanceUntilIdle()
+
+        viewModel.onIntent(BattleScoreIntent.SelectAction(actorId = 1, action = BattleAction.GANG))
+        viewModel.onIntent(BattleScoreIntent.SelectGangType(GangType.DIAN))
+        viewModel.onIntent(BattleScoreIntent.ConfirmDraftStep)
+        advanceUntilIdle()
+
+        assertEquals(EventDraftStep.TARGET, viewModel.uiState.value.eventDraft?.step)
+        viewModel.onIntent(BattleScoreIntent.SelectTarget(targetId = 2))
+        advanceUntilIdle()
+
+        val players = viewModel.uiState.value.players.associateBy { it.id }
+        assertEquals("105", players.getValue(1).totalScore)
+        assertEquals("97", players.getValue(2).totalScore)
+        assertEquals("99", players.getValue(3).totalScore)
+        assertEquals("99", players.getValue(4).totalScore)
+        assertEquals(PlayerStatus.ZIMO, players.getValue(1).status)
+        assertNull(viewModel.uiState.value.eventDraft)
+        assertEquals(
+            LiveLogActionType.GANG_DIAN,
+            viewModel.uiState.value.liveLogs.first().actionType
+        )
+    }
+
+    @Test
+    fun latestHuOrZimoPlayer_onlyCurrentWinnerCanStartGangDraft() = runTest {
+        val viewModel = BattleScoreViewModel(
+            playerRepository = FakePlayerRepository(initialPlayers = fourPlayers()),
+            gameSettingsRepository = FakeGameSettingsRepository()
+        )
+        advanceUntilIdle()
+
+        hu(viewModel, actorId = 1, targetId = 2)
+        viewModel.onIntent(BattleScoreIntent.SelectAction(actorId = 3, action = BattleAction.ZIMO))
+        viewModel.onIntent(BattleScoreIntent.SelectMultiplier(multiplier = 1))
+        viewModel.onIntent(BattleScoreIntent.ConfirmEvent)
+        advanceUntilIdle()
+
+        viewModel.onIntent(BattleScoreIntent.SelectAction(actorId = 1, action = BattleAction.GANG))
+        advanceUntilIdle()
+        assertNull(viewModel.uiState.value.eventDraft)
+
+        viewModel.onIntent(BattleScoreIntent.SelectAction(actorId = 3, action = BattleAction.GANG))
+        advanceUntilIdle()
+        assertNotNull(viewModel.uiState.value.eventDraft)
+        assertEquals(3, viewModel.uiState.value.eventDraft?.actorId)
+    }
+
+    @Test
+    fun activePlayer_canStillStartGangDraft_afterMultipleHuOrZimoPlayers() = runTest {
+        val viewModel = BattleScoreViewModel(
+            playerRepository = FakePlayerRepository(initialPlayers = fourPlayers()),
+            gameSettingsRepository = FakeGameSettingsRepository()
+        )
+        advanceUntilIdle()
+
+        hu(viewModel, actorId = 1, targetId = 2)
+        viewModel.onIntent(BattleScoreIntent.SelectAction(actorId = 3, action = BattleAction.ZIMO))
+        viewModel.onIntent(BattleScoreIntent.SelectMultiplier(multiplier = 1))
+        viewModel.onIntent(BattleScoreIntent.ConfirmEvent)
+        advanceUntilIdle()
+
+        viewModel.onIntent(BattleScoreIntent.SelectAction(actorId = 2, action = BattleAction.GANG))
+        advanceUntilIdle()
+
+        assertNotNull(viewModel.uiState.value.eventDraft)
+        assertEquals(2, viewModel.uiState.value.eventDraft?.actorId)
+        assertEquals(BattleAction.GANG, viewModel.uiState.value.eventDraft?.action)
     }
 
     @Test
@@ -903,6 +1194,34 @@ class BattleScoreViewModelTest {
     }
 
     @Test
+    fun resetAll_afterDealerChanges_resetsDealerToFirstPlayer() = runTest {
+        val viewModel = BattleScoreViewModel(
+            playerRepository = FakePlayerRepository(initialPlayers = fourPlayers()),
+            gameSettingsRepository = FakeGameSettingsRepository()
+        )
+        advanceUntilIdle()
+
+        hu(viewModel, actorId = 3, targetId = 4)
+        hu(viewModel, actorId = 1, targetId = 2)
+        hu(viewModel, actorId = 2, targetId = 4)
+        advanceUntilIdle()
+        viewModel.onIntent(BattleScoreIntent.ConfirmSettleAndNextRound)
+        advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.players.first { it.id == 3 }.isDealer)
+
+        viewModel.onIntent(BattleScoreIntent.OpenResetAllConfirmDialog)
+        viewModel.onIntent(BattleScoreIntent.ConfirmResetAllConfirmDialog)
+        viewModel.onIntent(BattleScoreIntent.ConfirmResetAllConfirmDialog)
+        advanceUntilIdle()
+
+        val resetPlayers = viewModel.uiState.value.players.associateBy { it.id }
+        assertTrue(resetPlayers.getValue(1).isDealer)
+        assertFalse(resetPlayers.getValue(2).isDealer)
+        assertFalse(resetPlayers.getValue(3).isDealer)
+        assertFalse(resetPlayers.getValue(4).isDealer)
+    }
+
+    @Test
     fun undoLastEvent_restoresWinOrderAndCounter() = runTest {
         val viewModel = BattleScoreViewModel(
             playerRepository = FakePlayerRepository(initialPlayers = fourPlayers()),
@@ -947,6 +1266,29 @@ class BattleScoreViewModelTest {
         assertNull(players.getValue(1).winOrder)
         assertNull(players.getValue(2).winOrder)
         assertNull(players.getValue(3).winOrder)
+    }
+
+    @Test
+    fun nextRound_dealerBecomesFirstHuOrZimoPlayerOfPreviousRound() = runTest {
+        val viewModel = BattleScoreViewModel(
+            playerRepository = FakePlayerRepository(initialPlayers = fourPlayers()),
+            gameSettingsRepository = FakeGameSettingsRepository()
+        )
+        advanceUntilIdle()
+
+        hu(viewModel, actorId = 3, targetId = 4)
+        hu(viewModel, actorId = 1, targetId = 2)
+        hu(viewModel, actorId = 2, targetId = 4)
+        advanceUntilIdle()
+
+        viewModel.onIntent(BattleScoreIntent.ConfirmSettleAndNextRound)
+        advanceUntilIdle()
+
+        val players = viewModel.uiState.value.players.associateBy { it.id }
+        assertTrue(players.getValue(3).isDealer)
+        assertFalse(players.getValue(1).isDealer)
+        assertFalse(players.getValue(2).isDealer)
+        assertFalse(players.getValue(4).isDealer)
     }
 
     @Test
@@ -1199,6 +1541,56 @@ class BattleScoreViewModelTest {
         )
     )
 
+    private fun playersWithBothSideHorseBinding(): List<Player> = listOf(
+        Player(id = 1, name = "A", score = 100, createdAt = 1L, isActive = true, playerRole = PlayerRole.ON_TABLE),
+        Player(id = 2, name = "B", score = 100, createdAt = 2L, isActive = true, playerRole = PlayerRole.ON_TABLE),
+        Player(id = 3, name = "C", score = 100, createdAt = 3L, isActive = true, playerRole = PlayerRole.ON_TABLE),
+        Player(id = 4, name = "D", score = 100, createdAt = 4L, isActive = true, playerRole = PlayerRole.ON_TABLE),
+        Player(
+            id = 5,
+            name = "E",
+            score = 100,
+            createdAt = 5L,
+            isActive = true,
+            playerRole = PlayerRole.HORSE,
+            boundOnTablePlayerId = 1
+        ),
+        Player(
+            id = 6,
+            name = "F",
+            score = 100,
+            createdAt = 6L,
+            isActive = true,
+            playerRole = PlayerRole.HORSE,
+            boundOnTablePlayerId = 2
+        )
+    )
+
+    private fun playersWithMultipleHorsesBoundToWinner(): List<Player> = listOf(
+        Player(id = 1, name = "A", score = 100, createdAt = 1L, isActive = true, playerRole = PlayerRole.ON_TABLE),
+        Player(id = 2, name = "B", score = 100, createdAt = 2L, isActive = true, playerRole = PlayerRole.ON_TABLE),
+        Player(id = 3, name = "C", score = 100, createdAt = 3L, isActive = true, playerRole = PlayerRole.ON_TABLE),
+        Player(id = 4, name = "D", score = 100, createdAt = 4L, isActive = true, playerRole = PlayerRole.ON_TABLE),
+        Player(
+            id = 5,
+            name = "E",
+            score = 100,
+            createdAt = 5L,
+            isActive = true,
+            playerRole = PlayerRole.HORSE,
+            boundOnTablePlayerId = 1
+        ),
+        Player(
+            id = 6,
+            name = "F",
+            score = 100,
+            createdAt = 6L,
+            isActive = true,
+            playerRole = PlayerRole.HORSE,
+            boundOnTablePlayerId = 1
+        )
+    )
+
     private fun playersWithHorseBoundToTarget(): List<Player> = listOf(
         Player(id = 1, name = "A", score = 100, createdAt = 1L, isActive = true, playerRole = PlayerRole.ON_TABLE),
         Player(id = 2, name = "B", score = 100, createdAt = 2L, isActive = true, playerRole = PlayerRole.ON_TABLE),
@@ -1214,4 +1606,39 @@ class BattleScoreViewModelTest {
             boundOnTablePlayerId = 2
         )
     )
+
+    private class DeferredPlayerRepository : PlayerRepository {
+        private val playersFlow = MutableSharedFlow<List<Player>>(replay = 0)
+
+        suspend fun emitPlayers(players: List<Player>) {
+            playersFlow.emit(players.sortedByDescending { it.createdAt })
+        }
+
+        override fun observePlayers(): Flow<List<Player>> = playersFlow
+
+        override fun observeRecentPlayers(limit: Int): Flow<List<Player>> = playersFlow
+
+        override suspend fun addPlayer(
+            name: String,
+            initialScore: Int,
+            avatarKey: String?
+        ): AddPlayerResult = AddPlayerResult.Success
+
+        override suspend fun updatePlayerProfile(
+            playerId: Int,
+            name: String,
+            initialScore: Int,
+            avatarKey: String?
+        ): AddPlayerResult = AddPlayerResult.Success
+
+        override suspend fun updatePlayerActiveStatus(playerId: Int, isActive: Boolean) = Unit
+
+        override suspend fun updatePlayerRole(playerId: Int, role: PlayerRole) = Unit
+
+        override suspend fun updateHorseBinding(playerId: Int, boundOnTablePlayerId: Int?) = Unit
+
+        override suspend fun swapOnTableWithHorse(onTablePlayerId: Int, horsePlayerId: Int) = Unit
+
+        override suspend fun updatePlayerAvatar(playerId: Int, avatarKey: String) = Unit
+    }
 }

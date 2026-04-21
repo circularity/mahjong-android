@@ -74,7 +74,11 @@
     <string name="battle_log_subtitle_gang_ba">巴杠</string>
     <string name="battle_log_subtitle_gang_an">暗杠</string>
     <string name="battle_log_title_template">%1$s %2$s</string>
+    <string name="battle_log_actor_horse_name_template">%1$s(马儿)</string>
+    <string name="battle_log_because_player_template">因为%1$s玩家</string>
+    <string name="battle_log_title_horse_because_template">%1$s %2$s %3$s</string>
     <string name="battle_log_name_separator">、</string>
+    <string name="battle_log_related_player_delta_template">%1$s%2$s</string>
     <string name="battle_log_related_none">无关联对象</string>
     <string name="battle_log_related_hu_template">点炮者：%1$s</string>
     <string name="battle_log_related_zimo_template">收分对象：%1$s</string>
@@ -122,6 +126,7 @@
     <string name="battle_draft_multiplier_dialog_title">选择番数（%1$d-%2$d番）</string>
     <string name="battle_draft_multiplier_dialog_subtitle">确认本次事件番数</string>
     <string name="battle_draft_multiplier_unit">番</string>
+    <string name="battle_fan_zero_label">小胡</string>
     <string name="battle_draft_confirm_score">确认分数</string>
 
     <string name="battle_settlement_title">本局结算</string>
@@ -139,16 +144,16 @@
     <string name="battle_draw_placeholder_message">流局结算流程将在后续版本完善。</string>
     <string name="battle_draw_placeholder_action">我知道了</string>
     <string name="battle_draw_progress">未胡玩家 %1$d/%2$d</string>
-    <string name="battle_draw_choose_ting_title">%1$s：选择停牌状态</string>
+    <string name="battle_draw_choose_ting_title">%1$s：选择下轿状态</string>
     <string name="battle_draw_choose_ting_subtitle">%1$s</string>
     <string name="battle_draw_current_score">当前总分：%1$s</string>
-    <string name="battle_draw_choice_ting">停牌</string>
-    <string name="battle_draw_choice_ting_desc">选择停牌分，未停牌玩家将向你赔付。</string>
-    <string name="battle_draw_choice_no_ting">不停牌</string>
-    <string name="battle_draw_choice_no_ting_desc">本轮不参与停牌赔付。</string>
+    <string name="battle_draw_choice_ting">下轿</string>
+    <string name="battle_draw_choice_ting_desc">选择下轿分，未下轿玩家将向你赔付。</string>
+    <string name="battle_draw_choice_no_ting">未下轿</string>
+    <string name="battle_draw_choice_no_ting_desc">本轮不参与下轿赔付。</string>
     <string name="battle_draw_choose_score_title">%1$s：选择番数</string>
     <string name="battle_draw_choose_score_subtitle">%1$s</string>
-    <string name="battle_draw_score_formula_hint">停牌分 = 底分 × 番数（%1$d-%2$d）</string>
+    <string name="battle_draw_score_formula_hint">下轿分 = 底分 × 番数（%1$d-%2$d）</string>
 
     <string name="players_page_title">玩家</string>
     <string name="players_add_title">添加新玩家</string>
@@ -156,10 +161,12 @@
     <string name="players_active_count">活跃玩家（%1$d）</string>
     <string name="players_active_section">活跃玩家</string>
     <string name="players_inactive_section">非活跃玩家（%1$d）</string>
-    <string name="players_status_active">活跃</string>
-    <string name="players_status_inactive">非活跃</string>
+    <string name="players_status_active">在线</string>
+    <string name="players_status_inactive">离线</string>
     <string name="players_role_on_table">场上</string>
     <string name="players_role_horse">马儿</string>
+    <string name="players_role_action_join_table">上场</string>
+    <string name="players_role_action_rest">下场休息</string>
     <string name="players_points_unit">PTS</string>
     <string name="players_win_rate">胜率 %1$d%%</string>
     <string name="players_total_games">对局 %1$d</string>

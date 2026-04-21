@@ -17,8 +17,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ash.mahjong.R
@@ -87,60 +92,124 @@ private fun LiveLogItem(item: LiveLogItemUiModel) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(spacing.md),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            horizontalArrangement = Arrangement.spacedBy(spacing.sm),
+            verticalAlignment = Alignment.Top
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(spacing.sm),
-                verticalAlignment = Alignment.CenterVertically
+            Box(
+                modifier = Modifier
+                    .size(MahjongDesign.spacing.logDot)
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = MahjongDesign.shapes.logDot
+                    )
+            )
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(spacing.xxs)
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(MahjongDesign.spacing.logDot)
-                        .background(
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                            shape = MahjongDesign.shapes.logDot
-                        )
-                )
-                Column(verticalArrangement = Arrangement.spacedBy(spacing.xxs)) {
-                    val actionLabel = stringResource(actionLabelRes(item.actionType))
+                val actionLabel = stringResource(actionLabelRes(item.actionType))
+                val actorDisplayName = if (item.actorIsHorse) {
+                    stringResource(R.string.battle_log_actor_horse_name_template, item.actorName)
+                } else {
+                    item.actorName
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(spacing.sm),
+                    verticalAlignment = Alignment.Top
+                ) {
                     Text(
-                        text = stringResource(
-                            R.string.battle_log_title_template,
-                            item.actorName,
-                            actionLabel
+                        modifier = Modifier.weight(1f),
+                        text = buildTitleText(
+                            item = item,
+                            actorDisplayName = actorDisplayName,
+                            actionLabel = actionLabel
                         ),
                         style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = subtitleText(item),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = item.amount,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = when (item.highlight) {
+                            LiveLogHighlight.POSITIVE -> MaterialTheme.colorScheme.primary
+                            LiveLogHighlight.NEGATIVE -> MaterialTheme.colorScheme.error
+                            LiveLogHighlight.NEUTRAL -> MaterialTheme.colorScheme.onSurface
+                        },
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        softWrap = false,
+                        textAlign = TextAlign.End
                     )
                 }
+                Text(
+                    text = subtitleText(item),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
-            Text(
-                text = item.amount,
-                style = MaterialTheme.typography.titleMedium,
-                color = when (item.highlight) {
-                    LiveLogHighlight.POSITIVE -> MaterialTheme.colorScheme.primary
-                    LiveLogHighlight.NEGATIVE -> MaterialTheme.colorScheme.error
-                    LiveLogHighlight.NEUTRAL -> MaterialTheme.colorScheme.onSurface
-                },
-                fontWeight = FontWeight.Bold
-            )
         }
     }
 }
 
 @Composable
+private fun buildTitleText(
+    item: LiveLogItemUiModel,
+    actorDisplayName: String,
+    actionLabel: String
+) = buildAnnotatedString {
+    if (item.actorIsHorse && !item.becausePlayerName.isNullOrBlank()) {
+        val becauseSegment = stringResource(
+            R.string.battle_log_because_player_template,
+            item.becausePlayerName
+        )
+        val fullTitle = stringResource(
+            R.string.battle_log_title_horse_because_template,
+            actorDisplayName,
+            becauseSegment,
+            actionLabel
+        )
+        append(fullTitle)
+        val start = fullTitle.indexOf(becauseSegment)
+        if (start >= 0) {
+            addStyle(
+                style = SpanStyle(color = MaterialTheme.colorScheme.primary),
+                start = start,
+                end = start + becauseSegment.length
+            )
+        }
+    } else {
+        append(
+            stringResource(
+                R.string.battle_log_title_template,
+                actorDisplayName,
+                actionLabel
+            )
+        )
+    }
+}
+
+@Composable
 private fun subtitleText(item: LiveLogItemUiModel): String {
-    if (item.relatedPlayerNames.isEmpty()) {
+    if (item.relatedPlayerNames.isEmpty() && item.relatedPlayerDetails.isEmpty()) {
         return stringResource(R.string.battle_log_related_none)
     }
     val separator = stringResource(R.string.battle_log_name_separator)
-    val joinedNames = item.relatedPlayerNames.joinToString(separator = separator)
+    val context = LocalContext.current
+    val joinedNames = if (item.relatedPlayerDetails.isNotEmpty()) {
+        item.relatedPlayerDetails
+            .joinToString(separator = separator) { related ->
+                context.getString(
+                    R.string.battle_log_related_player_delta_template,
+                    related.name,
+                    related.delta
+                )
+            }
+    } else {
+        item.relatedPlayerNames.joinToString(separator = separator)
+    }
     return stringResource(relatedTemplateRes(item.actionType), joinedNames)
 }
 
