@@ -25,12 +25,12 @@ class FakeGameSettingsRepository(
         }
     }
 
-    override suspend fun updateCappingMultiplier(multiplier: Int) {
+    override suspend fun updateCappingFan(fan: Int) {
         settingsFlow.update { state ->
             state.copy(
-                cappingMultiplier = multiplier.coerceIn(
-                    GameSettings.MIN_CAPPING_MULTIPLIER,
-                    GameSettings.MAX_CAPPING_MULTIPLIER
+                cappingFan = fan.coerceIn(
+                    GameSettings.MIN_CAPPING_FAN,
+                    GameSettings.MAX_CAPPING_FAN
                 )
             )
         }

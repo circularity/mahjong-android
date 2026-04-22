@@ -222,7 +222,7 @@
     <string name="settings_section_feedback">反馈</string>
     <string name="settings_section_about">关于与支持</string>
     <string name="settings_bottom_point_label">底分</string>
-    <string name="settings_capping_label">封顶倍数</string>
+    <string name="settings_capping_label">封顶番数</string>
     <string name="settings_haptic_label">震动反馈</string>
     <string name="settings_version_label">版本号</string>
     <string name="settings_version_value">v%1$s</string>

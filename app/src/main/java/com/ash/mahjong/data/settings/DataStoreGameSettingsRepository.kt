@@ -17,18 +17,18 @@ class DataStoreGameSettingsRepository @Inject constructor(
         return dataStore.data.map { preferences ->
             val basePoint = (preferences[BASE_POINT_KEY] ?: GameSettings.DEFAULT_BASE_POINT)
                 .coerceIn(GameSettings.MIN_BASE_POINT, GameSettings.MAX_BASE_POINT)
-            val cappingMultiplier =
-                (preferences[CAPPING_MULTIPLIER_KEY] ?: GameSettings.DEFAULT_CAPPING_MULTIPLIER)
+            val cappingFan =
+                (preferences[CAPPING_FAN_KEY] ?: GameSettings.DEFAULT_CAPPING_FAN)
                     .coerceIn(
-                        GameSettings.MIN_CAPPING_MULTIPLIER,
-                        GameSettings.MAX_CAPPING_MULTIPLIER
+                        GameSettings.MIN_CAPPING_FAN,
+                        GameSettings.MAX_CAPPING_FAN
                     )
             val hapticsEnabled =
                 preferences[HAPTICS_ENABLED_KEY] ?: GameSettings.DEFAULT_HAPTICS_ENABLED
 
             GameSettings(
                 basePoint = basePoint,
-                cappingMultiplier = cappingMultiplier,
+                cappingFan = cappingFan,
                 hapticsEnabled = hapticsEnabled
             )
         }
@@ -41,11 +41,11 @@ class DataStoreGameSettingsRepository @Inject constructor(
         }
     }
 
-    override suspend fun updateCappingMultiplier(multiplier: Int) {
+    override suspend fun updateCappingFan(fan: Int) {
         dataStore.edit { preferences ->
-            preferences[CAPPING_MULTIPLIER_KEY] = multiplier.coerceIn(
-                GameSettings.MIN_CAPPING_MULTIPLIER,
-                GameSettings.MAX_CAPPING_MULTIPLIER
+            preferences[CAPPING_FAN_KEY] = fan.coerceIn(
+                GameSettings.MIN_CAPPING_FAN,
+                GameSettings.MAX_CAPPING_FAN
             )
         }
     }
@@ -64,7 +64,7 @@ class DataStoreGameSettingsRepository @Inject constructor(
 
     private companion object {
         val BASE_POINT_KEY = intPreferencesKey("base_point")
-        val CAPPING_MULTIPLIER_KEY = intPreferencesKey("capping_multiplier")
+        val CAPPING_FAN_KEY = intPreferencesKey("capping_fan")
         val HAPTICS_ENABLED_KEY = booleanPreferencesKey("haptics_enabled")
     }
 }

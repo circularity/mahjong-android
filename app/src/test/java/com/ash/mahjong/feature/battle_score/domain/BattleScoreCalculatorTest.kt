@@ -10,7 +10,7 @@ class BattleScoreCalculatorTest {
 
     @Test
     fun hu_scalesByBasePointAndMultiplier() {
-        val settings = GameSettings(basePoint = 2, cappingMultiplier = 8, hapticsEnabled = false)
+        val settings = GameSettings(basePoint = 2, cappingFan = 3, hapticsEnabled = false)
         val deltaByPlayer = calculator.calculateDelta(
             actionType = BattleScoreActionType.HU,
             context = BattleScoreContext(actorId = 1, targetIds = listOf(2), multiplier = 3),
@@ -23,7 +23,7 @@ class BattleScoreCalculatorTest {
 
     @Test
     fun zimo_chargesEveryTargetAndSumsToActor() {
-        val settings = GameSettings(basePoint = 1, cappingMultiplier = 8, hapticsEnabled = false)
+        val settings = GameSettings(basePoint = 1, cappingFan = 3, hapticsEnabled = false)
         val deltaByPlayer = calculator.calculateDelta(
             actionType = BattleScoreActionType.ZIMO,
             context = BattleScoreContext(actorId = 1, targetIds = listOf(2, 3), multiplier = 4),
@@ -37,7 +37,7 @@ class BattleScoreCalculatorTest {
 
     @Test
     fun gangTypes_applyDifferentFactors() {
-        val settings = GameSettings(basePoint = 1, cappingMultiplier = 8, hapticsEnabled = false)
+        val settings = GameSettings(basePoint = 1, cappingFan = 3, hapticsEnabled = false)
 
         val dian = calculator.calculateDelta(
             actionType = BattleScoreActionType.GANG_DIAN,
@@ -67,21 +67,21 @@ class BattleScoreCalculatorTest {
     }
 
     @Test
-    fun multiplier_isClampedBySettingsCap() {
-        val settings = GameSettings(basePoint = 2, cappingMultiplier = 3, hapticsEnabled = false)
+    fun multiplier_isClampedBySettingsFanCap() {
+        val settings = GameSettings(basePoint = 2, cappingFan = 2, hapticsEnabled = false)
         val deltaByPlayer = calculator.calculateDelta(
             actionType = BattleScoreActionType.HU,
             context = BattleScoreContext(actorId = 1, targetIds = listOf(2), multiplier = 99),
             settings = settings
         )
 
-        assertEquals(6, deltaByPlayer[1])
-        assertEquals(-6, deltaByPlayer[2])
+        assertEquals(8, deltaByPlayer[1])
+        assertEquals(-8, deltaByPlayer[2])
     }
 
     @Test
     fun gang_fixedRuleCoefficients_matchDescriptionAtMultiplierOne() {
-        val settings = GameSettings(basePoint = 3, cappingMultiplier = 8, hapticsEnabled = false)
+        val settings = GameSettings(basePoint = 3, cappingFan = 3, hapticsEnabled = false)
 
         val dian = calculator.calculateDelta(
             actionType = BattleScoreActionType.GANG_DIAN,

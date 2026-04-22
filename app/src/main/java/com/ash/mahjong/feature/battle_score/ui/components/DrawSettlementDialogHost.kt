@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -159,6 +160,8 @@ private fun DrawMultiplierChoiceDialog(
     onBack: () -> Unit,
     onCancel: () -> Unit
 ) {
+    val optionsMaxHeight = (LocalConfiguration.current.screenHeightDp.dp * 0.62f)
+        .coerceIn(360.dp, 520.dp)
     val fanOptions = buildDrawMultiplierOptions(range.last).mapIndexed { index, multiplier ->
         DrawFanOptionUiModel(multiplier = multiplier, displayFan = index)
     }
@@ -188,7 +191,7 @@ private fun DrawMultiplierChoiceDialog(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(max = 300.dp)
+                .heightIn(max = optionsMaxHeight)
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {

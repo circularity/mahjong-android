@@ -104,19 +104,19 @@ fun SettingsScreen(
 
             StepperRow(
                 title = stringResource(R.string.settings_capping_label),
-                value = uiState.cappingMultiplier,
-                canDecrease = uiState.canDecreaseCappingMultiplier,
-                canIncrease = uiState.canIncreaseCappingMultiplier,
+                value = uiState.cappingFan,
+                canDecrease = uiState.canDecreaseCappingFan,
+                canIncrease = uiState.canIncreaseCappingFan,
                 valueTag = SettingsTestTags.CAPPING_VALUE,
                 increaseTag = SettingsTestTags.CAPPING_INCREASE,
                 onDecrease = {
                     runWithHaptic {
-                        onIntent(SettingsIntent.OnDecreaseCappingMultiplier)
+                        onIntent(SettingsIntent.OnDecreaseCappingFan)
                     }
                 },
                 onIncrease = {
                     runWithHaptic {
-                        onIntent(SettingsIntent.OnIncreaseCappingMultiplier)
+                        onIntent(SettingsIntent.OnIncreaseCappingFan)
                     }
                 }
             )

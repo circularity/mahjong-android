@@ -564,7 +564,7 @@ class BattleScoreViewModelTest {
         val viewModel = BattleScoreViewModel(
             playerRepository = FakePlayerRepository(initialPlayers = fourPlayers()),
             gameSettingsRepository = FakeGameSettingsRepository(
-                initialSettings = GameSettings(basePoint = 1, cappingMultiplier = 8, hapticsEnabled = false)
+                initialSettings = GameSettings(basePoint = 1, cappingFan = 3, hapticsEnabled = false)
             )
         )
         advanceUntilIdle()
@@ -593,7 +593,7 @@ class BattleScoreViewModelTest {
         val liveLogs = viewModel.uiState.value.liveLogs
         assertEquals("C", liveLogs.first().actorName)
         assertEquals(LiveLogActionType.ZIMO, liveLogs.first().actionType)
-        assertEquals(listOf("A", "D"), liveLogs.first().relatedPlayerNames)
+        assertEquals(setOf("A", "D"), liveLogs.first().relatedPlayerNames.toSet())
         assertEquals("B", liveLogs[1].actorName)
         assertEquals(LiveLogActionType.HU, liveLogs[1].actionType)
         assertEquals(listOf("A"), liveLogs[1].relatedPlayerNames)
@@ -679,7 +679,10 @@ class BattleScoreViewModelTest {
         assertEquals("99", afterBa.getValue(4).totalScore)
         assertEquals(LiveLogActionType.GANG_BA, viewModel.uiState.value.liveLogs.first().actionType)
         assertEquals("A", viewModel.uiState.value.liveLogs.first().actorName)
-        assertEquals(listOf("B", "C", "D"), viewModel.uiState.value.liveLogs.first().relatedPlayerNames)
+        assertEquals(
+            setOf("B", "C", "D"),
+            viewModel.uiState.value.liveLogs.first().relatedPlayerNames.toSet()
+        )
     }
 
     @Test
@@ -1294,7 +1297,7 @@ class BattleScoreViewModelTest {
     @Test
     fun settingsUpdate_updatesMultiplierRangeAndClampsDraft() = runTest {
         val settingsRepository = FakeGameSettingsRepository(
-            initialSettings = GameSettings(basePoint = 1, cappingMultiplier = 8, hapticsEnabled = false)
+            initialSettings = GameSettings(basePoint = 1, cappingFan = 3, hapticsEnabled = false)
         )
         val viewModel = BattleScoreViewModel(
             playerRepository = FakePlayerRepository(initialPlayers = fourPlayers()),
@@ -1307,11 +1310,11 @@ class BattleScoreViewModelTest {
         viewModel.onIntent(BattleScoreIntent.SelectMultiplier(multiplier = 8))
         advanceUntilIdle()
 
-        settingsRepository.updateCappingMultiplier(3)
+        settingsRepository.updateCappingFan(1)
         advanceUntilIdle()
 
         val state = viewModel.uiState.value
-        assertEquals(1..3, state.multiplierRange)
+        assertEquals(1..2, state.multiplierRange)
         assertEquals(2, state.eventDraft?.multiplier)
     }
 
@@ -1338,7 +1341,7 @@ class BattleScoreViewModelTest {
     @Test
     fun multiplier_usesPowersOfTwoUntilCappingLimit() = runTest {
         val settingsRepository = FakeGameSettingsRepository(
-            initialSettings = GameSettings(basePoint = 1, cappingMultiplier = 20, hapticsEnabled = false)
+            initialSettings = GameSettings(basePoint = 1, cappingFan = 4, hapticsEnabled = false)
         )
         val viewModel = BattleScoreViewModel(
             playerRepository = FakePlayerRepository(initialPlayers = fourPlayers()),
@@ -1353,7 +1356,7 @@ class BattleScoreViewModelTest {
 
         assertEquals(16, viewModel.uiState.value.eventDraft?.multiplier)
 
-        settingsRepository.updateCappingMultiplier(12)
+        settingsRepository.updateCappingFan(3)
         advanceUntilIdle()
 
         assertEquals(8, viewModel.uiState.value.eventDraft?.multiplier)

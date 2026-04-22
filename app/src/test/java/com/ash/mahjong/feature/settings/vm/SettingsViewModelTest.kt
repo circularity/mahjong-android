@@ -22,7 +22,7 @@ class SettingsViewModelTest {
         val repository = FakeGameSettingsRepository(
             initialSettings = GameSettings(
                 basePoint = 6,
-                cappingMultiplier = 12,
+                cappingFan = 5,
                 hapticsEnabled = true
             )
         )
@@ -32,30 +32,30 @@ class SettingsViewModelTest {
 
         val state = viewModel.uiState.value
         assertEquals(6, state.basePoint)
-        assertEquals(12, state.cappingMultiplier)
+        assertEquals(5, state.cappingFan)
         assertEquals(true, state.hapticsEnabled)
     }
 
     @Test
     fun stepperBounds_respectMinAndMax() = runTest {
         val repository = FakeGameSettingsRepository(
-            initialSettings = GameSettings(basePoint = 1, cappingMultiplier = 32)
+            initialSettings = GameSettings(basePoint = 1, cappingFan = 10)
         )
         val viewModel = SettingsViewModel(repository)
         advanceUntilIdle()
 
         repeat(10) { viewModel.onIntent(SettingsIntent.OnDecreaseBasePoint) }
-        repeat(10) { viewModel.onIntent(SettingsIntent.OnIncreaseCappingMultiplier) }
+        repeat(10) { viewModel.onIntent(SettingsIntent.OnIncreaseCappingFan) }
         advanceUntilIdle()
 
         assertEquals(1, viewModel.uiState.value.basePoint)
-        assertEquals(32, viewModel.uiState.value.cappingMultiplier)
+        assertEquals(10, viewModel.uiState.value.cappingFan)
     }
 
     @Test
     fun clearCache_resetsToDefaults() = runTest {
         val repository = FakeGameSettingsRepository(
-            initialSettings = GameSettings(basePoint = 7, cappingMultiplier = 11, hapticsEnabled = true)
+            initialSettings = GameSettings(basePoint = 7, cappingFan = 9, hapticsEnabled = true)
         )
         val viewModel = SettingsViewModel(repository)
         advanceUntilIdle()
@@ -65,7 +65,7 @@ class SettingsViewModelTest {
 
         val state = viewModel.uiState.value
         assertEquals(GameSettings.DEFAULT_BASE_POINT, state.basePoint)
-        assertEquals(GameSettings.DEFAULT_CAPPING_MULTIPLIER, state.cappingMultiplier)
+        assertEquals(GameSettings.DEFAULT_CAPPING_FAN, state.cappingFan)
         assertEquals(GameSettings.DEFAULT_HAPTICS_ENABLED, state.hapticsEnabled)
     }
 

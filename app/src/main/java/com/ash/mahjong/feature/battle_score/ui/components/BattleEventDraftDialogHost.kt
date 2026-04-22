@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -310,6 +311,8 @@ private fun MultiplierDialog(
     onSelect: (Int) -> Unit,
     onBack: () -> Unit
 ) {
+    val optionsMaxHeight = (LocalConfiguration.current.screenHeightDp.dp * 0.62f)
+        .coerceIn(360.dp, 520.dp)
     val fanOptions = buildMultiplierOptions(range.last).mapIndexed { index, multiplier ->
         FanOptionUiModel(multiplier = multiplier, displayFan = index)
     }
@@ -331,7 +334,7 @@ private fun MultiplierDialog(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(max = 360.dp)
+                .heightIn(max = optionsMaxHeight)
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {

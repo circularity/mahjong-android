@@ -7,7 +7,7 @@ interface GameSettingsRepository {
 
     suspend fun updateBasePoint(basePoint: Int)
 
-    suspend fun updateCappingMultiplier(multiplier: Int)
+    suspend fun updateCappingFan(fan: Int)
 
     suspend fun updateHapticsEnabled(enabled: Boolean)
 

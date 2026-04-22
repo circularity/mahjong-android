@@ -1176,7 +1176,7 @@ class BattleScoreViewModel @Inject constructor(
             canUndo = false,
             canSettle = false,
             playerSwapDialogVisible = false,
-            multiplierRange = 1..GameSettings.DEFAULT_CAPPING_MULTIPLIER,
+            multiplierRange = 1..GameSettings.fanToMultiplier(GameSettings.DEFAULT_CAPPING_FAN),
             eventDraft = null,
             drawSettlementDraft = null,
             settlementPrompt = null,

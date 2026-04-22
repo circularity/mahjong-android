@@ -38,18 +38,18 @@ class SettingsScreenTest {
         openSettings()
 
         composeRule.onNodeWithTag(SettingsTestTags.BASE_POINT_VALUE).assertTextEquals("1")
-        composeRule.onNodeWithTag(SettingsTestTags.CAPPING_VALUE).assertTextEquals("8")
+        composeRule.onNodeWithTag(SettingsTestTags.CAPPING_VALUE).assertTextEquals("3")
 
         composeRule.onNodeWithTag(SettingsTestTags.BASE_POINT_INCREASE).performClick()
         composeRule.onNodeWithTag(SettingsTestTags.CAPPING_INCREASE).performClick()
 
         composeRule.onNodeWithTag(SettingsTestTags.BASE_POINT_VALUE).assertTextEquals("2")
-        composeRule.onNodeWithTag(SettingsTestTags.CAPPING_VALUE).assertTextEquals("9")
+        composeRule.onNodeWithTag(SettingsTestTags.CAPPING_VALUE).assertTextEquals("4")
 
         composeRule.onNodeWithTag(SettingsTestTags.CLEAR_CACHE).performClick()
 
         composeRule.onNodeWithTag(SettingsTestTags.BASE_POINT_VALUE).assertTextEquals("1")
-        composeRule.onNodeWithTag(SettingsTestTags.CAPPING_VALUE).assertTextEquals("8")
+        composeRule.onNodeWithTag(SettingsTestTags.CAPPING_VALUE).assertTextEquals("3")
     }
 
     @Test

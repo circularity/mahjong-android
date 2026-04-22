@@ -28,7 +28,7 @@ class SettingsViewModel @Inject constructor(
                 _uiState.update { state ->
                     state.copy(
                         basePoint = settings.basePoint,
-                        cappingMultiplier = settings.cappingMultiplier,
+                        cappingFan = settings.cappingFan,
                         hapticsEnabled = settings.hapticsEnabled
                     )
                 }
@@ -40,12 +40,12 @@ class SettingsViewModel @Inject constructor(
         when (intent) {
             SettingsIntent.OnDecreaseBasePoint -> updateBasePoint(uiState.value.basePoint - 1)
             SettingsIntent.OnIncreaseBasePoint -> updateBasePoint(uiState.value.basePoint + 1)
-            SettingsIntent.OnDecreaseCappingMultiplier -> {
-                updateCappingMultiplier(uiState.value.cappingMultiplier - 1)
+            SettingsIntent.OnDecreaseCappingFan -> {
+                updateCappingFan(uiState.value.cappingFan - 1)
             }
 
-            SettingsIntent.OnIncreaseCappingMultiplier -> {
-                updateCappingMultiplier(uiState.value.cappingMultiplier + 1)
+            SettingsIntent.OnIncreaseCappingFan -> {
+                updateCappingFan(uiState.value.cappingFan + 1)
             }
 
             is SettingsIntent.OnHapticsEnabledChange -> {
@@ -68,9 +68,9 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    private fun updateCappingMultiplier(multiplier: Int) {
+    private fun updateCappingFan(fan: Int) {
         viewModelScope.launch {
-            gameSettingsRepository.updateCappingMultiplier(multiplier)
+            gameSettingsRepository.updateCappingFan(fan)
         }
     }
 }
